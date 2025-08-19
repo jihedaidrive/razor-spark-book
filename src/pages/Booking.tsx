@@ -178,7 +178,6 @@ const Booking: React.FC = () => {
                 <SelectValue placeholder="Any barber" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any Available Barber</SelectItem>
                 {barbers.map((barber) => (
                   <SelectItem key={barber.id} value={barber.id}>
                     <div className="flex items-center space-x-2">
@@ -201,7 +200,6 @@ const Booking: React.FC = () => {
                 <SelectValue placeholder="Any service" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any Service</SelectItem>
                 {services.map((service) => (
                   <SelectItem key={service.id} value={service.id}>
                     <div className="flex items-center justify-between w-full">
