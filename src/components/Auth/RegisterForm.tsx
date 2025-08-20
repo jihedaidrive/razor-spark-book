@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { Loader2, Phone, Lock, User } from 'lucide-react';
 
 const RegisterForm: React.FC = () => {
@@ -38,7 +38,7 @@ const RegisterForm: React.FC = () => {
     setIsLoading(true);
     try {
       await register(formData.phone, formData.password, formData.name);
-      navigate('/');
+      navigate('/dashboard');
     } catch (error) {
       // Error is handled by the auth context
     } finally {

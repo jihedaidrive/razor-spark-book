@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { Loader2, Phone, Lock } from 'lucide-react';
 
 const LoginForm: React.FC = () => {
@@ -13,6 +13,9 @@ const LoginForm: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  const from = location.state?.from?.pathname || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,7 +24,7 @@ const LoginForm: React.FC = () => {
     setIsLoading(true);
     try {
       await login(phone, password);
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (error) {
       // Error is handled by the auth context
     } finally {
@@ -37,7 +40,7 @@ const LoginForm: React.FC = () => {
       } else {
         await login('+1234567890', 'client123');
       }
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (error) {
       // Error is handled by the auth context
     } finally {
