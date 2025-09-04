@@ -11,33 +11,49 @@ const LoginForm: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // PHONE VALIDATION: Must be exactly 8 digits
+  const validatePhone = (phoneNumber: string): boolean => {
+    const cleanPhone = phoneNumber.replace(/\D/g, ''); // Remove non-digits
+    if (cleanPhone.length !== 8) {
+      setPhoneError('Phone number must be exactly 8 digits');
+      return false;
+    }
+    setPhoneError('');
+    return true;
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Only allow digits and limit to 8 characters
+    const cleanValue = value.replace(/\D/g, '').slice(0, 8);
+    setPhone(cleanValue);
+    
+    // Clear error when user starts typing
+    if (phoneError) {
+      setPhoneError('');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phone || !password) return;
+    
+    // Validate phone number before submission
+    if (!validatePhone(phone)) {
+      return;
+    }
+    
+    if (!password) {
+      return;
+    }
 
     setIsLoading(true);
     try {
       await login(phone, password);
-      navigate('/');
-    } catch (error) {
-      // Error is handled by the auth context
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDemoLogin = async (role: 'client' | 'admin') => {
-    setIsLoading(true);
-    try {
-      if (role === 'admin') {
-        await login('+1111111111', 'admin123');
-      } else {
-        await login('+1234567890', 'client123');
-      }
-      navigate('/');
+      navigate('/dashboard'); // Navigate to dashboard after successful login
     } catch (error) {
       // Error is handled by the auth context
     } finally {
@@ -67,13 +83,18 @@ const LoginForm: React.FC = () => {
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="+1234567890"
+                  placeholder="12345678"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="pl-10"
+                  onChange={handlePhoneChange}
+                  className={`pl-10 ${phoneError ? 'border-destructive' : ''}`}
                   required
+                  maxLength={8}
                 />
               </div>
+              {phoneError && (
+                <p className="text-sm text-destructive">{phoneError}</p>
+              )}
+              <p className="text-xs text-muted-foreground">Enter exactly 8 digits</p>
             </div>
             
             <div className="space-y-2">
@@ -95,43 +116,13 @@ const LoginForm: React.FC = () => {
             <Button
               type="submit"
               className="w-full"
-              disabled={isLoading || !phone || !password}
+              disabled={isLoading || !phone || !password || phoneError !== ''}
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Sign In
             </Button>
           </form>
-          
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Demo Accounts</span>
-              </div>
-            </div>
-            
-            <div className="mt-4 space-y-2">
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => handleDemoLogin('client')}
-                disabled={isLoading}
-              >
-                Demo Client (+1234567890)
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => handleDemoLogin('admin')}
-                disabled={isLoading}
-              >
-                Demo Admin (+1111111111)
-              </Button>
-            </div>
-          </div>
-          
+
           <div className="mt-6 text-center text-sm">
             <span className="text-muted-foreground">Don't have an account? </span>
             <Link

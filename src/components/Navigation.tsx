@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { Calendar, Home, LogOut, Settings, User } from 'lucide-react';
+import { Calendar, Home, LogOut, Settings, User, History } from 'lucide-react';
 
 const Navigation: React.FC = () => {
   const { user, logout } = useAuth();
@@ -34,20 +34,32 @@ const Navigation: React.FC = () => {
                 </Link>
               </Button>
 
-              {user.role === 'client' && (
-                <Button
-                  variant={isActive('/booking') ? 'default' : 'ghost'}
-                  size="sm"
-                  asChild
-                >
-                  <Link to="/booking">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    Book
-                  </Link>
-                </Button>
+              {user.role === 'user' && (
+                <>
+                  <Button
+                    variant={isActive('/booking') ? 'default' : 'ghost'}
+                    size="sm"
+                    asChild
+                  >
+                    <Link to="/booking">
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Book
+                    </Link>
+                  </Button>
+                  <Button
+                    variant={isActive('/my-bookings') ? 'default' : 'ghost'}
+                    size="sm"
+                    asChild
+                  >
+                    <Link to="/my-bookings">
+                      <History className="w-4 h-4 mr-2" />
+                      My History
+                    </Link>
+                  </Button>
+                </>
               )}
 
-              {(user.role === 'admin' || user.role === 'barber') && (
+              {user.role === 'admin' && (
                 <Button
                   variant={isActive('/dashboard') ? 'default' : 'ghost'}
                   size="sm"
@@ -55,7 +67,7 @@ const Navigation: React.FC = () => {
                 >
                   <Link to="/dashboard">
                     <Settings className="w-4 h-4 mr-2" />
-                    Dashboard
+                    Admin Dashboard
                   </Link>
                 </Button>
               )}

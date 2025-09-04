@@ -1,279 +1,250 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { TimeSlot, Barber, Service, Reservation } from '@/types';
+import { TimeSlot, Barber, Reservation, reservationsService } from '@/api/reservationsApi';
+import { Service } from '@/api/reservationsApi';
+import { servicesApi } from '@/api/servicesApi';
 import { useAuth } from '@/contexts/AuthContext';
-import { servicesService, reservationsService } from '@/services/api';
 import { toast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
-import { Calendar, Clock, User, Scissors, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { format, formatISO } from 'date-fns';
+import { User, Calendar, Scissors } from 'lucide-react';
 
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   selectedSlot: TimeSlot | null;
   selectedBarber: Barber | null;
-  onBookingComplete: (reservation: Reservation) => void;
+  onBookingComplete: (reservation?: Reservation) => void;
 }
 
-const BookingModal: React.FC<BookingModalProps> = ({
+export default function BookingModal({
   isOpen,
   onClose,
   selectedSlot,
   selectedBarber,
-  onBookingComplete,
-}) => {
-  const { user } = useAuth();
+  onBookingComplete
+}: BookingModalProps) {
+  const [notes, setNotes] = useState('');
   const [services, setServices] = useState<Service[]>([]);
-  const [formData, setFormData] = useState({
-    clientName: user?.name || '',
-    clientPhone: user?.phone || '',
-    serviceId: '',
-    description: '',
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadingServices, setLoadingServices] = useState(true);
+  const [selectedServices, setSelectedServices] = useState<Service[]>([]);
 
   useEffect(() => {
-    if (isOpen) {
-      fetchServices();
-      setFormData({
-        clientName: user?.name || '',
-        clientPhone: user?.phone || '',
-        serviceId: '',
-        description: '',
-      });
-    }
-  }, [isOpen, user]);
+    if (!isOpen) return;
+    fetchServices();
+    // Reset selected services when modal opens
+    setSelectedServices([]);
+    setNotes('');
+  }, [isOpen]);
 
   const fetchServices = async () => {
     try {
-      const fetchedServices = await servicesService.getServices();
+      const fetchedServices = await servicesApi.getServices();
       setServices(fetchedServices);
     } catch (error) {
-      console.error('Failed to fetch services:', error);
       toast({
-        title: "Error",
-        description: "Failed to load services",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to fetch services',
+        variant: 'destructive',
       });
-    } finally {
-      setLoadingServices(false);
     }
   };
 
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
+  const { user } = useAuth();
+
+  // Handle service selection (multiple services)
+  const handleServiceToggle = (service: Service, checked: boolean) => {
+    if (checked) {
+      setSelectedServices(prev => [...prev, service]);
+    } else {
+      setSelectedServices(prev => prev.filter(s => s.id !== service.id));
+    }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!selectedSlot || !selectedBarber || !formData.serviceId || !formData.clientName || !formData.clientPhone) {
+  // Calculate totals for selected services
+  const totalPrice = selectedServices.reduce((sum, service) => sum + service.price, 0);
+  const totalDuration = selectedServices.reduce((sum, service) => sum + service.duration, 0);
+
+  const handleConfirm = async () => {
+    if (!selectedSlot || !selectedBarber || selectedServices.length === 0 || !user) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields",
-        variant: "destructive",
+        title: 'Error',
+        description: selectedServices.length === 0 
+          ? 'Please select at least one service' 
+          : 'Please login to book an appointment',
+        variant: 'destructive',
       });
       return;
     }
 
-    const selectedService = services.find(s => s.id === formData.serviceId);
-    if (!selectedService) {
-      toast({
-        title: "Invalid Service",
-        description: "Please select a valid service",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
     try {
-      const reservation: Omit<Reservation, 'id' | 'createdAt' | 'updatedAt'> = {
-        clientId: user?.id || 'guest',
-        clientName: formData.clientName,
-        clientPhone: formData.clientPhone,
-        barberId: selectedBarber.id,
-        barberName: selectedBarber.name,
-        serviceId: selectedService.id,
-        serviceName: selectedService.name,
-        date: new Date(selectedSlot.date),
-        startTime: selectedSlot.startTime,
-        endTime: selectedSlot.endTime,
-        status: 'pending',
-        description: formData.description,
-      };
-
-      const createdReservation = await reservationsService.createReservation(reservation);
+      const formattedDate = formatISO(new Date(selectedSlot.date), { representation: 'date' });
       
-      toast({
-        title: "Booking Confirmed!",
-        description: `Your appointment with ${selectedBarber.name} has been booked for ${format(new Date(selectedSlot.date), 'MMM d, yyyy')} at ${selectedSlot.startTime}`,
+      // Send multiple service IDs to backend
+      const reservation = await reservationsService.createReservation({
+        clientName: user.name,
+        clientPhone: user.phone,
+        barberName: selectedBarber.name,
+        date: formattedDate,
+        startTime: selectedSlot.startTime,
+        serviceIds: selectedServices.map(service => service.id), // Multiple services
+        notes
       });
 
-      onBookingComplete(createdReservation);
+      const serviceNames = selectedServices.map(s => s.name).join(', ');
+      toast({
+        title: 'Reservation Pending',
+        description: `Your appointment for ${serviceNames} has been sent and is awaiting confirmation.`
+      });
+      onBookingComplete(reservation);
       onClose();
     } catch (error) {
+      console.error('Booking error:', error);
       toast({
-        title: "Booking Failed",
-        description: error instanceof Error ? error.message : "Failed to create booking",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to book appointment',
+        variant: 'destructive'
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const selectedService = services.find(s => s.id === formData.serviceId);
+  if (!isOpen || !selectedSlot || !selectedBarber) return null;
+
+  const bookingDate = selectedSlot.date;
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
-            <Calendar className="w-5 h-5 text-primary" />
-            <span>Book Appointment</span>
-          </DialogTitle>
-          <DialogDescription>
-            Complete your booking details below
-          </DialogDescription>
+    <Dialog open={isOpen} onOpenChange={() => onClose()}>
+      <DialogContent className="w-[95vw] max-w-[425px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="pb-4">
+          <DialogTitle className="text-lg sm:text-xl">Confirm Booking</DialogTitle>
         </DialogHeader>
 
-        {selectedSlot && selectedBarber && (
-          <div className="bg-muted/50 rounded-lg p-4 mb-4">
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="flex items-center space-x-2">
-                <User className="w-4 h-4 text-primary" />
-                <span className="font-medium">{selectedBarber.name}</span>
+        <div className="space-y-4 sm:space-y-6">
+          {/* Mobile-optimized booking details */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
+            <div>
+              <h4 className="text-sm font-medium mb-2 flex items-center">
+                <User className="w-4 h-4 mr-2" />
+                Barber
+              </h4>
+              <div className="text-sm text-muted-foreground font-medium">{selectedBarber.name}</div>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-medium mb-2 flex items-center">
+                <Calendar className="w-4 h-4 mr-2" />
+                Date & Time
+              </h4>
+              <div className="text-sm text-muted-foreground">
+                <div className="font-medium">{format(new Date(bookingDate), 'EEE, MMM d, yyyy')}</div>
+                <div className="text-xs mt-1">{selectedSlot.startTime} - {selectedSlot.endTime}</div>
               </div>
-              <div className="flex items-center space-x-2">
-                <Calendar className="w-4 h-4 text-primary" />
-                <span>{format(new Date(selectedSlot.date), 'MMM d, yyyy')}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Clock className="w-4 h-4 text-primary" />
-                <span>{selectedSlot.startTime} - {selectedSlot.endTime}</span>
-              </div>
-              {selectedService && (
-                <div className="flex items-center space-x-2">
-                  <Scissors className="w-4 h-4 text-primary" />
-                  <span>${selectedService.price}</span>
-                </div>
-              )}
             </div>
           </div>
-        )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="clientName">Full Name *</Label>
-              <Input
-                id="clientName"
-                type="text"
-                placeholder="Enter your name"
-                value={formData.clientName}
-                onChange={(e) => handleInputChange('clientName', e.target.value)}
-                required
-              />
+          <div className="space-y-3">
+            <label className="text-sm font-medium flex items-center">
+              <Scissors className="w-4 h-4 mr-2" />
+              Services (Select one or more)
+            </label>
+            
+            {/* Mobile-optimized service selection */}
+            <div className="space-y-2 max-h-60 sm:max-h-48 overflow-y-auto">
+              {services.map(service => (
+                <div key={service.id} className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+                  <Checkbox
+                    id={service.id}
+                    checked={selectedServices.some(s => s.id === service.id)}
+                    onCheckedChange={(checked) => handleServiceToggle(service, checked as boolean)}
+                    className="mt-0.5"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <label 
+                      htmlFor={service.id} 
+                      className="text-sm font-medium cursor-pointer block"
+                    >
+                      {service.name}
+                    </label>
+                    <div className="flex items-center justify-between mt-1">
+                      <div className="text-xs text-muted-foreground">
+                        {service.duration} minutes
+                      </div>
+                      <div className="text-sm font-medium text-green-600">
+                        ${service.price}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="clientPhone">Phone Number *</Label>
-              <Input
-                id="clientPhone"
-                type="tel"
-                placeholder="+1234567890"
-                value={formData.clientPhone}
-                onChange={(e) => handleInputChange('clientPhone', e.target.value)}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="service">Service *</Label>
-            {loadingServices ? (
-              <div className="h-10 bg-muted animate-pulse rounded-md" />
-            ) : (
-              <Select
-                value={formData.serviceId}
-                onValueChange={(value) => handleInputChange('serviceId', value)}
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a service" />
-                </SelectTrigger>
-                <SelectContent>
-                  {services.map((service) => (
-                    <SelectItem key={service.id} value={service.id}>
-                      <div className="flex items-center justify-between w-full">
-                        <span>{service.name}</span>
-                        <span className="text-muted-foreground ml-2">
-                          ${service.price} • {service.duration}min
-                        </span>
-                      </div>
-                    </SelectItem>
+            {/* Mobile-optimized summary */}
+            {selectedServices.length > 0 && (
+              <div className="mt-4 p-4 bg-gradient-to-r from-muted/40 to-muted/20 rounded-lg border">
+                <div className="text-sm font-medium mb-3 flex items-center">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Booking Summary
+                </div>
+                <div className="space-y-2">
+                  {selectedServices.map(service => (
+                    <div key={service.id} className="flex justify-between items-center text-sm">
+                      <span className="text-muted-foreground truncate pr-2">{service.name}</span>
+                      <span className="font-medium">${service.price}</span>
+                    </div>
                   ))}
-                </SelectContent>
-              </Select>
+                  <div className="border-t pt-3 mt-3 flex justify-between items-center">
+                    <div className="text-sm">
+                      <div className="font-medium">Total Duration</div>
+                      <div className="text-xs text-muted-foreground">{totalDuration} minutes</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-lg font-bold text-green-600">${totalPrice}</div>
+                      <div className="text-xs text-muted-foreground">Total Price</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Special Requests (Optional)</Label>
-            <Textarea
-              id="description"
-              placeholder="Any specific requests or notes..."
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              rows={3}
+            <label className="text-sm font-medium">Notes (Optional)</label>
+            <Input 
+              value={notes} 
+              onChange={e => setNotes(e.target.value)} 
+              placeholder="Any special requests..."
+              className="h-11 sm:h-10"
             />
           </div>
 
-          <div className="flex space-x-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
+          {/* Mobile-optimized buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:justify-end pt-4 border-t">
+            <Button 
+              variant="outline" 
               onClick={onClose}
-              className="flex-1"
-              disabled={isLoading}
+              className="w-full sm:w-auto order-2 sm:order-1"
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              className="flex-1"
-              disabled={isLoading || loadingServices}
+            <Button 
+              onClick={handleConfirm}
+              disabled={selectedServices.length === 0}
+              className="w-full sm:w-auto order-1 sm:order-2 h-11 sm:h-10"
             >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Confirm Booking
+              <div className="flex items-center justify-center space-x-2">
+                <Calendar className="w-4 h-4" />
+                <span>
+                  {selectedServices.length === 0 
+                    ? 'Select Services' 
+                    : `Book Now - $${totalPrice}`
+                  }
+                </span>
+              </div>
             </Button>
           </div>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
-};
-
-export default BookingModal;
+}

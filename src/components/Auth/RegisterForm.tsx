@@ -15,22 +15,54 @@ const RegisterForm: React.FC = () => {
     confirmPassword: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
 
+  // PHONE VALIDATION: Must be exactly 8 digits
+  const validatePhone = (phoneNumber: string): boolean => {
+    const cleanPhone = phoneNumber.replace(/\D/g, ''); // Remove non-digits
+    if (cleanPhone.length !== 8) {
+      setPhoneError('Phone number must be exactly 8 digits');
+      return false;
+    }
+    setPhoneError('');
+    return true;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+    
+    if (name === 'phone') {
+      // Only allow digits and limit to 8 characters
+      const cleanValue = value.replace(/\D/g, '').slice(0, 8);
+      setFormData({
+        ...formData,
+        [name]: cleanValue,
+      });
+      
+      // Clear error when user starts typing
+      if (phoneError) {
+        setPhoneError('');
+      }
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
+    // Validate phone number before submission
+    if (!validatePhone(formData.phone)) {
       return;
+    }
+    
+    if (formData.password !== formData.confirmPassword) {
+      return; // Error already shown in UI
     }
 
     if (!formData.name || !formData.phone || !formData.password) return;
@@ -38,7 +70,7 @@ const RegisterForm: React.FC = () => {
     setIsLoading(true);
     try {
       await register(formData.phone, formData.password, formData.name);
-      navigate('/');
+      navigate('/dashboard'); // Navigate to dashboard after successful registration
     } catch (error) {
       // Error is handled by the auth context
     } finally {
@@ -51,7 +83,8 @@ const RegisterForm: React.FC = () => {
     formData.phone &&
     formData.password &&
     formData.confirmPassword &&
-    formData.password === formData.confirmPassword;
+    formData.password === formData.confirmPassword &&
+    phoneError === '';
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/50 p-4">
@@ -93,13 +126,18 @@ const RegisterForm: React.FC = () => {
                   id="phone"
                   name="phone"
                   type="tel"
-                  placeholder="+1234567890"
+                  placeholder="12345678"
                   value={formData.phone}
                   onChange={handleChange}
-                  className="pl-10"
+                  className={`pl-10 ${phoneError ? 'border-destructive' : ''}`}
                   required
+                  maxLength={8}
                 />
               </div>
+              {phoneError && (
+                <p className="text-sm text-destructive">{phoneError}</p>
+              )}
+              <p className="text-xs text-muted-foreground">Enter exactly 8 digits</p>
             </div>
             
             <div className="space-y-2">
