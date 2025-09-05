@@ -475,10 +475,14 @@ const Dashboard: React.FC = () => {
         status: r.status
       });
 
+      // Parse date in local time to fix off-by-one day issue
+      const [year, month, day] = r.date.split('-').map(Number);
+      const localDate = new Date(year, month - 1, day);
+
       return {
         id: r._id || r.id,
         barberId: r.barberName,
-        date: new Date(r.date),
+        date: localDate,
         startTime: r.startTime,
         endTime: r.endTime || `${parseInt(r.startTime.split(':')[0]) + 1}:00`,
         isAvailable: r.status === 'cancelled', // Only cancelled slots are truly available

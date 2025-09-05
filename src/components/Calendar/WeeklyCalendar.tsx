@@ -157,7 +157,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
   }
 
   return (
-    <Card className="border-0 sm:border shadow-none sm:shadow-sm overflow-hidden">
+    <Card className="border-0 sm:border shadow-none sm:shadow-sm">
       <CardHeader className="px-3 sm:px-6 py-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
           <CardTitle className="flex items-center space-x-2 text-lg">

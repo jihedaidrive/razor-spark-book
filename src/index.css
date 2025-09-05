@@ -139,10 +139,19 @@ All colors MUST be HSL.
   html {
     scroll-behavior: smooth;
   }
+
+  /* Ensure proper mobile scrolling */
+  html, body {
+    overflow-x: hidden;
+  }
+
+  body {
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 @layer components {
-  /* Barber-themed component styles */
+  /* Mobile-first barber-themed component styles */
   .hero-section {
     background: var(--gradient-hero);
     box-shadow: var(--shadow-elegant);
@@ -155,7 +164,7 @@ All colors MUST be HSL.
   }
   
   .service-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-2px);
     box-shadow: var(--shadow-glow);
   }
   
@@ -166,7 +175,7 @@ All colors MUST be HSL.
   }
   
   .btn-primary:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     box-shadow: var(--shadow-glow);
   }
   
@@ -178,6 +187,7 @@ All colors MUST be HSL.
     transform: scale(1.02);
   }
   
+  /* Mobile-first animations */
   .animate-fade-in {
     animation: fadeIn 0.6s ease-out;
   }
@@ -188,6 +198,57 @@ All colors MUST be HSL.
   
   .animate-scale-in {
     animation: scaleIn 0.4s ease-out;
+  }
+
+  /* Mobile-specific utilities */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+
+  /* Mobile card styles */
+  .mobile-card {
+    @apply bg-card rounded-xl border border-border/50 shadow-sm;
+  }
+
+  .mobile-card-header {
+    @apply p-4 pb-2;
+  }
+
+  .mobile-card-content {
+    @apply p-4 pt-2;
+  }
+
+  /* Mobile button styles */
+  .mobile-btn {
+    @apply h-12 px-6 text-base font-medium rounded-xl touch-manipulation;
+  }
+
+  .mobile-btn-sm {
+    @apply h-10 px-4 text-sm font-medium rounded-lg touch-manipulation;
+  }
+
+  /* Mobile input styles */
+  .mobile-input {
+    @apply h-12 px-4 text-base rounded-xl border-2 focus:border-primary;
+  }
+
+  /* Mobile navigation styles */
+  .mobile-nav-item {
+    @apply flex flex-col items-center justify-center min-w-0 flex-1 py-2 px-1 rounded-lg transition-all duration-200 touch-manipulation;
+  }
+
+  /* Mobile responsive grid */
+  .mobile-grid {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  /* Mobile spacing */
+  .mobile-container {
+    @apply px-4 py-4 max-w-md mx-auto sm:max-w-2xl lg:max-w-4xl xl:max-w-6xl;
   }
 }
 

@@ -9,6 +9,7 @@ export interface CreateReservationData {
   barberName: string;
   date: string;           // e.g., "2025-08-26"
   startTime: string;      // "HH:MM"
+  endTime: string;        // "HH:MM" - Required by backend
   serviceId?: string;     // single service
   serviceIds?: string[];  // multiple services
   notes?: string;

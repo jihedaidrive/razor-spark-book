@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { Calendar, Home, LogOut, Settings, User, History } from 'lucide-react';
+import { Calendar, Home, LogOut, Settings, User, History, Menu, X } from 'lucide-react';
 
 const Navigation: React.FC = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
+
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
   return (
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
@@ -20,7 +23,8 @@ const Navigation: React.FC = () => {
           <span className="font-bold text-xl text-foreground">BarberShop</span>
         </Link>
 
-        <div className="flex items-center space-x-4">
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center space-x-4">
           {user ? (
             <>
               <Button
@@ -96,7 +100,126 @@ const Navigation: React.FC = () => {
             </div>
           )}
         </div>
+
+        {/* Mobile Menu Button */}
+        <div className="md:hidden">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleMobileMenu}
+          >
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </Button>
+        </div>
       </div>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-background border-b border-border">
+          <div className="container mx-auto px-4 py-4 space-y-2">
+            {user ? (
+              <>
+                <Button
+                  variant={isActive('/') ? 'default' : 'ghost'}
+                  size="sm"
+                  className="w-full justify-start"
+                  asChild
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Link to="/">
+                    <Home className="w-4 h-4 mr-2" />
+                    Home
+                  </Link>
+                </Button>
+
+                {user.role === 'user' && (
+                  <>
+                    <Button
+                      variant={isActive('/booking') ? 'default' : 'ghost'}
+                      size="sm"
+                      className="w-full justify-start"
+                      asChild
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Link to="/booking">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        Book Appointment
+                      </Link>
+                    </Button>
+                    <Button
+                      variant={isActive('/my-bookings') ? 'default' : 'ghost'}
+                      size="sm"
+                      className="w-full justify-start"
+                      asChild
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      <Link to="/my-bookings">
+                        <History className="w-4 h-4 mr-2" />
+                        My History
+                      </Link>
+                    </Button>
+                  </>
+                )}
+
+                {user.role === 'admin' && (
+                  <Button
+                    variant={isActive('/dashboard') ? 'default' : 'ghost'}
+                    size="sm"
+                    className="w-full justify-start"
+                    asChild
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Link to="/dashboard">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Admin Dashboard
+                    </Link>
+                  </Button>
+                )}
+
+                <div className="pt-2 border-t border-border">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">
+                      {user.name || user.phone}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        logout();
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Logout
+                    </Button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="space-y-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  asChild
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Link to="/login">Login</Link>
+                </Button>
+                <Button 
+                  variant="default" 
+                  size="sm" 
+                  className="w-full justify-start"
+                  asChild
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Link to="/register">Sign Up</Link>
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { format, formatISO } from 'date-fns';
 import { User, Calendar, Scissors } from 'lucide-react';
+import { sanitizeNotes, sanitizeHtml } from '@/utils/security';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -67,6 +68,7 @@ export default function BookingModal({
   const totalDuration = selectedServices.reduce((sum, service) => sum + service.duration, 0);
 
   const handleConfirm = async () => {
+    // Enhanced validation
     if (!selectedSlot || !selectedBarber || selectedServices.length === 0 || !user) {
       toast({
         title: 'Error',
@@ -78,32 +80,103 @@ export default function BookingModal({
       return;
     }
 
+    // Validate selected date is not in the past
+    const selectedDate = new Date(`${selectedSlot.date}T00:00:00`);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < today) {
+      toast({
+        title: 'Invalid Date',
+        description: 'Cannot book appointments for past dates',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate service selection limits
+    if (selectedServices.length > 5) {
+      toast({
+        title: 'Too Many Services',
+        description: 'Maximum 5 services can be selected per appointment',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
-      const formattedDate = formatISO(new Date(selectedSlot.date), { representation: 'date' });
+      const formattedDate = formatISO(selectedDate, { representation: 'date' });
+      const sanitizedNotes = sanitizeNotes(notes);
       
-      // Send multiple service IDs to backend
-      const reservation = await reservationsService.createReservation({
-        clientName: user.name,
+      // Validate service IDs
+      const validServiceIds = selectedServices
+        .map(service => service.id)
+        .filter(id => id && typeof id === 'string' && id.length > 0);
+      
+      if (validServiceIds.length !== selectedServices.length) {
+        throw new Error('Invalid service selection');
+      }
+
+      // Calculate end time based on selected services duration
+      const totalDurationMinutes = selectedServices.reduce((sum, service) => sum + service.duration, 0);
+      const startTimeDate = new Date(`2000-01-01T${selectedSlot.startTime}:00`);
+      const endTimeDate = new Date(startTimeDate.getTime() + totalDurationMinutes * 60000);
+      const endTime = endTimeDate.toTimeString().slice(0, 5); // Format as HH:MM
+
+      // Create reservation data (let axios client handle sanitization)
+      const reservationData = {
+        clientName: user.name, // Don't double-sanitize
         clientPhone: user.phone,
-        barberName: selectedBarber.name,
+        barberName: selectedBarber.name, // Don't double-sanitize
         date: formattedDate,
         startTime: selectedSlot.startTime,
-        serviceIds: selectedServices.map(service => service.id), // Multiple services
-        notes
-      });
+        endTime: endTime, // Add the missing endTime field
+        serviceIds: validServiceIds,
+        notes: sanitizedNotes
+      };
 
-      const serviceNames = selectedServices.map(s => s.name).join(', ');
+      if (import.meta.env.DEV) {
+        console.log('Creating reservation with data:', reservationData);
+      }
+
+      const reservation = await reservationsService.createReservation(reservationData);
+
+      const serviceNames = selectedServices
+        .map(s => sanitizeHtml(s.name))
+        .join(', ');
+        
       toast({
         title: 'Reservation Pending',
         description: `Your appointment for ${serviceNames} has been sent and is awaiting confirmation.`
       });
+      
       onBookingComplete(reservation);
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Booking error:', error);
+      console.error('Error response data:', error?.response?.data);
+      console.error('Error response status:', error?.response?.status);
+      console.error('Error response headers:', error?.response?.headers);
+      
+      // Log the full error object for debugging
+      if (import.meta.env.DEV) {
+        console.error('Full error object:', JSON.stringify(error?.response?.data, null, 2));
+      }
+      
+      const errorMessage = error?.response?.data?.message || 
+                          error?.response?.data?.error ||
+                          error?.response?.data?.details ||
+                          error?.message || 
+                          'Failed to book appointment';
+      
+      // Show detailed error in development
+      const detailedError = import.meta.env.DEV 
+        ? `${errorMessage} (Status: ${error?.response?.status}) - Check console for details`
+        : errorMessage;
+      
       toast({
-        title: 'Error',
-        description: 'Failed to book appointment',
+        title: 'Booking Error',
+        description: detailedError,
         variant: 'destructive'
       });
     }
@@ -115,63 +188,72 @@ export default function BookingModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
-      <DialogContent className="w-[95vw] max-w-[425px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="pb-4">
-          <DialogTitle className="text-lg sm:text-xl">Confirm Booking</DialogTitle>
+      <DialogContent className="w-[95vw] max-w-md max-h-[85vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl fixed bottom-0 sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:bottom-auto">
+        <DialogHeader className="pb-4 border-b">
+          <DialogTitle className="text-xl font-bold text-center">Confirm Booking</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 sm:space-y-6">
-          {/* Mobile-optimized booking details */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-muted/30 rounded-lg">
-            <div>
-              <h4 className="text-sm font-medium mb-2 flex items-center">
-                <User className="w-4 h-4 mr-2" />
-                Barber
-              </h4>
-              <div className="text-sm text-muted-foreground font-medium">{selectedBarber.name}</div>
-            </div>
-
-            <div>
-              <h4 className="text-sm font-medium mb-2 flex items-center">
-                <Calendar className="w-4 h-4 mr-2" />
-                Date & Time
-              </h4>
-              <div className="text-sm text-muted-foreground">
-                <div className="font-medium">{format(new Date(bookingDate), 'EEE, MMM d, yyyy')}</div>
-                <div className="text-xs mt-1">{selectedSlot.startTime} - {selectedSlot.endTime}</div>
+        <div className="space-y-6">
+          {/* Mobile-First Booking Details Card */}
+          <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl p-4 border border-primary/10">
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                  <User className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h4 className="font-semibold">{selectedBarber.name}</h4>
+                  <p className="text-sm text-muted-foreground">Your Barber</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-secondary/10 rounded-full flex items-center justify-center">
+                  <Calendar className="w-5 h-5 text-secondary" />
+                </div>
+                <div>
+                  <h4 className="font-semibold">{format(new Date(`${bookingDate}T00:00:00`), 'EEE, MMM d, yyyy')}</h4>
+                  <p className="text-sm text-muted-foreground">{selectedSlot.startTime} - {selectedSlot.endTime}</p>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <label className="text-sm font-medium flex items-center">
-              <Scissors className="w-4 h-4 mr-2" />
-              Services (Select one or more)
-            </label>
+          {/* Mobile-First Service Selection */}
+          <div className="space-y-4">
+            <div className="flex items-center space-x-2">
+              <Scissors className="w-5 h-5 text-primary" />
+              <h3 className="font-semibold">Select Services</h3>
+            </div>
             
-            {/* Mobile-optimized service selection */}
-            <div className="space-y-2 max-h-60 sm:max-h-48 overflow-y-auto">
+            {/* Service Cards */}
+            <div className="space-y-3 max-h-64 overflow-y-auto">
               {services.map(service => (
-                <div key={service.id} className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                  <Checkbox
-                    id={service.id}
-                    checked={selectedServices.some(s => s.id === service.id)}
-                    onCheckedChange={(checked) => handleServiceToggle(service, checked as boolean)}
-                    className="mt-0.5"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <label 
-                      htmlFor={service.id} 
-                      className="text-sm font-medium cursor-pointer block"
-                    >
-                      {service.name}
-                    </label>
-                    <div className="flex items-center justify-between mt-1">
-                      <div className="text-xs text-muted-foreground">
-                        {service.duration} minutes
-                      </div>
-                      <div className="text-sm font-medium text-green-600">
-                        ${service.price}
+                <div 
+                  key={service.id} 
+                  className={`p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer touch-manipulation ${
+                    selectedServices.some(s => s.id === service.id)
+                      ? 'border-primary bg-primary/5 shadow-md'
+                      : 'border-border hover:border-primary/50 hover:bg-muted/30'
+                  }`}
+                  onClick={() => handleServiceToggle(service, !selectedServices.some(s => s.id === service.id))}
+                >
+                  <div className="flex items-center space-x-3">
+                    <Checkbox
+                      id={service.id}
+                      checked={selectedServices.some(s => s.id === service.id)}
+                      onCheckedChange={(checked) => handleServiceToggle(service, checked as boolean)}
+                      className="pointer-events-none"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium">{service.name}</h4>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-sm text-muted-foreground">
+                          {service.duration} min
+                        </span>
+                        <span className="text-lg font-bold text-primary">
+                          ${service.price}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -179,28 +261,28 @@ export default function BookingModal({
               ))}
             </div>
             
-            {/* Mobile-optimized summary */}
+            {/* Mobile-First Summary */}
             {selectedServices.length > 0 && (
-              <div className="mt-4 p-4 bg-gradient-to-r from-muted/40 to-muted/20 rounded-lg border">
-                <div className="text-sm font-medium mb-3 flex items-center">
+              <div className="bg-gradient-to-r from-primary/5 to-secondary/5 rounded-xl p-4 border border-primary/10">
+                <h4 className="font-semibold mb-3 flex items-center">
                   <Calendar className="w-4 h-4 mr-2" />
                   Booking Summary
-                </div>
+                </h4>
                 <div className="space-y-2">
                   {selectedServices.map(service => (
-                    <div key={service.id} className="flex justify-between items-center text-sm">
-                      <span className="text-muted-foreground truncate pr-2">{service.name}</span>
+                    <div key={service.id} className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground truncate pr-2">{service.name}</span>
                       <span className="font-medium">${service.price}</span>
                     </div>
                   ))}
-                  <div className="border-t pt-3 mt-3 flex justify-between items-center">
-                    <div className="text-sm">
-                      <div className="font-medium">Total Duration</div>
-                      <div className="text-xs text-muted-foreground">{totalDuration} minutes</div>
+                  <div className="border-t border-primary/20 pt-3 mt-3">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-medium">Total Duration</span>
+                      <span className="text-sm text-muted-foreground">{totalDuration} min</span>
                     </div>
-                    <div className="text-right">
-                      <div className="text-lg font-bold text-green-600">${totalPrice}</div>
-                      <div className="text-xs text-muted-foreground">Total Price</div>
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold">Total Price</span>
+                      <span className="text-xl font-bold text-primary">${totalPrice}</span>
                     </div>
                   </div>
                 </div>
@@ -212,10 +294,20 @@ export default function BookingModal({
             <label className="text-sm font-medium">Notes (Optional)</label>
             <Input 
               value={notes} 
-              onChange={e => setNotes(e.target.value)} 
-              placeholder="Any special requests..."
-              className="h-11 sm:h-10"
+              onChange={e => {
+                const value = e.target.value;
+                // Limit input length and prevent potentially dangerous characters
+                if (value.length <= 500) {
+                  setNotes(value.replace(/[<>]/g, ''));
+                }
+              }}
+              placeholder="Any special requests or preferences..."
+              className="h-12 px-4 rounded-xl border-2 focus:border-primary"
+              maxLength={500}
             />
+            <div className="text-xs text-muted-foreground">
+              {notes.length}/500 characters
+            </div>
           </div>
 
           {/* Mobile-optimized buttons */}

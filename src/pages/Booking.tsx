@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import WeeklyCalendar from '@/components/Calendar/WeeklyCalendar';
 import BookingModal from '@/components/Booking/BookingModal';
+import MobileLayout from '@/components/MobileLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { Calendar, List, User, Scissors, Clock } from 'lucide-react';
@@ -238,22 +239,21 @@ const Booking: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Mobile-optimized container with proper padding */}
-      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 max-w-7xl">
-        {/* Mobile-first Header */}
-        <div className="mb-4 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1 sm:mb-2">Book Appointment</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">Choose your barber and time</p>
-        </div>
+    <MobileLayout>
+      {/* Mobile-first Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Book Appointment</h1>
+        <p className="text-sm sm:text-base text-muted-foreground">Choose your barber and time</p>
+      </div>
 
-        {/* Mobile-optimized Filters - Stack on mobile, grid on larger screens */}
-        <div className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-4 mb-4 sm:mb-6">
-          {/* Barber Selection - Full width on mobile */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Select Barber</label>
+      {/* Mobile-First Filters */}
+      <div className="space-y-4 mb-6">
+        {/* Barber Selection Card */}
+        <Card className="mobile-card">
+          <CardContent className="mobile-card-content">
+            <label className="text-sm font-medium mb-2 block">Select Barber</label>
             <Select value={selectedBarber} onValueChange={setSelectedBarber}>
-              <SelectTrigger className="h-11 sm:h-10">
+              <SelectTrigger className="mobile-input">
                 <SelectValue placeholder="Any barber" />
               </SelectTrigger>
               <SelectContent>
@@ -267,13 +267,15 @@ const Booking: React.FC = () => {
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* Service Selection - Full width on mobile */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Service (Optional)</label>
+        {/* Service Selection Card */}
+        <Card className="mobile-card">
+          <CardContent className="mobile-card-content">
+            <label className="text-sm font-medium mb-2 block">Service (Optional)</label>
             <Select value={selectedService} onValueChange={setSelectedService}>
-              <SelectTrigger className="h-11 sm:h-10">
+              <SelectTrigger className="mobile-input">
                 <SelectValue placeholder="Any service" />
               </SelectTrigger>
               <SelectContent>
@@ -290,147 +292,155 @@ const Booking: React.FC = () => {
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </CardContent>
+        </Card>
 
-          {/* View Toggle - Mobile-friendly buttons */}
-          <div className="space-y-2 sm:col-span-2 lg:col-span-1">
-            <label className="text-sm font-medium">View</label>
-            <div className="flex rounded-lg border p-1 bg-muted/20">
+        {/* View Toggle Card */}
+        <Card className="mobile-card">
+          <CardContent className="mobile-card-content">
+            <label className="text-sm font-medium mb-2 block">View Mode</label>
+            <div className="flex rounded-xl border-2 p-1 bg-muted/20">
               <button
                 onClick={() => setCalendarView('week')}
-                className={`flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${calendarView === 'week'
-                  ? 'bg-background text-foreground shadow-sm'
+                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 touch-manipulation ${calendarView === 'week'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
                   }`}
               >
                 <Calendar className="w-4 h-4" />
-                <span className="hidden sm:inline">Week</span>
+                <span>Week</span>
               </button>
               <button
                 onClick={() => setCalendarView('list')}
-                className={`flex-1 flex items-center justify-center space-x-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${calendarView === 'list'
-                  ? 'bg-background text-foreground shadow-sm'
+                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 touch-manipulation ${calendarView === 'list'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
                   }`}
               >
                 <List className="w-4 h-4" />
-                <span className="hidden sm:inline">List</span>
+                <span>List</span>
               </button>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
+      </div>
 
-        {/* Mobile-optimized Debug Info - Collapsible on mobile */}
-        <details className="mb-4 sm:mb-6">
-          <summary className="cursor-pointer p-3 sm:p-4 bg-muted/50 rounded-lg text-sm font-medium">
-            📊 Debug Info ({reservations.length} reservations)
-          </summary>
-          <div className="mt-2 p-3 sm:p-4 bg-muted/30 rounded-lg text-xs sm:text-sm">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3">
+      {/* Mobile Debug Info - Collapsible */}
+      <details className="mb-6">
+        <summary className="cursor-pointer p-4 bg-muted/50 rounded-xl text-sm font-medium touch-manipulation">
+          📊 Debug Info ({reservations.length} reservations)
+        </summary>
+        <Card className="mobile-card mt-2">
+          <CardContent className="mobile-card-content">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3 text-xs sm:text-sm">
               <div>Reservations: {reservations.length}</div>
               <div>Calendar Slots: {calendarSlots.length}</div>
               <div>Updated: {new Date(lastUpdate).toLocaleTimeString()}</div>
             </div>
             <div className="space-y-1">
-              <p className="font-medium">Recent Status:</p>
+              <p className="font-medium text-sm">Recent Status:</p>
               {reservations.slice(0, 3).map(r => (
                 <div key={r._id || r.id} className="text-xs text-muted-foreground truncate">
                   {r.barberName} - {r.startTime} - {r.status}
                 </div>
               ))}
             </div>
-          </div>
-        </details>
+          </CardContent>
+        </Card>
+      </details>
 
-        {/* Mobile-optimized Calendar / List */}
-        <div className="w-full">
-          {calendarView === 'week' ? (
-            <WeeklyCalendar
-              key={`calendar-${lastUpdate}-${JSON.stringify(reservations.map(r => ({ id: r._id || r.id, status: r.status })))}`}
-              timeSlots={calendarSlots}
-              barbers={selectedBarber ? availableBarbers.filter(b => b.id === selectedBarber) : availableBarbers}
-              selectedBarber={selectedBarber}
-              onSlotClick={handleSlotClick}
-              isLoading={isLoading}
-            />
-          ) : (
-            <Card className="border-0 sm:border shadow-none sm:shadow-sm">
-              <CardHeader className="px-3 sm:px-6 py-4">
-                <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
-                  <List className="w-5 h-5" />
-                  <span>Available Slots</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="px-3 sm:px-6">
-                <div className="space-y-3">
-                  {calendarSlots.filter(slot => slot.isAvailable).length === 0 ? (
-                    <div className="text-center py-12">
-                      <Calendar className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                      <p className="text-muted-foreground">No available slots found</p>
-                      <p className="text-sm text-muted-foreground mt-1">Try adjusting your filters</p>
-                    </div>
-                  ) : (
-                    calendarSlots
-                      .filter(slot => slot.isAvailable)
-                      .slice(0, 20)
-                      .map(slot => {
-                        const barber = availableBarbers.find(b => b.id === slot.barberId);
-                        if (!barber) return null;
-                        return (
-                          <div
-                            key={slot.id}
-                            className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors space-y-3 sm:space-y-0"
-                          >
-                            <div className="flex-1">
-                              <div className="flex items-center space-x-3 mb-2 sm:mb-0">
-                                <div className="flex items-center space-x-2">
-                                  <User className="w-4 h-4 text-muted-foreground" />
+      {/* Mobile-First Calendar / List */}
+      <div className="w-full">
+        {calendarView === 'week' ? (
+          <WeeklyCalendar
+            key={`calendar-${lastUpdate}-${JSON.stringify(reservations.map(r => ({ id: r._id || r.id, status: r.status })))}`}
+            timeSlots={calendarSlots}
+            barbers={selectedBarber ? availableBarbers.filter(b => b.id === selectedBarber) : availableBarbers}
+            selectedBarber={selectedBarber}
+            onSlotClick={handleSlotClick}
+            isLoading={isLoading}
+          />
+        ) : (
+          <Card className="mobile-card">
+            <CardHeader className="mobile-card-header">
+              <CardTitle className="flex items-center space-x-2 text-lg">
+                <List className="w-5 h-5" />
+                <span>Available Slots</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="mobile-card-content">
+              <div className="space-y-3">
+                {calendarSlots.filter(slot => slot.isAvailable).length === 0 ? (
+                  <div className="text-center py-12">
+                    <Calendar className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">No available slots found</p>
+                    <p className="text-sm text-muted-foreground mt-1">Try adjusting your filters</p>
+                  </div>
+                ) : (
+                  calendarSlots
+                    .filter(slot => slot.isAvailable)
+                    .slice(0, 20)
+                    .map(slot => {
+                      const barber = availableBarbers.find(b => b.id === slot.barberId);
+                      if (!barber) return null;
+                      return (
+                        <Card key={slot.id} className="mobile-card hover:shadow-md transition-all duration-200">
+                          <CardContent className="mobile-card-content">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <User className="w-4 h-4 text-primary" />
                                   <span className="font-medium">{barber.name}</span>
                                 </div>
-                              </div>
-                              <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                                <div className="flex items-center space-x-1">
-                                  <Calendar className="w-4 h-4" />
-                                  <span>{format(slot.date, 'EEE, MMM d')}</span>
+                                <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                                  <div className="flex items-center space-x-1">
+                                    <Calendar className="w-4 h-4" />
+                                    <span>{format(slot.date, 'EEE, MMM d')}</span>
+                                  </div>
+                                  <div className="flex items-center space-x-1">
+                                    <Clock className="w-4 h-4" />
+                                    <span>{slot.startTime}</span>
+                                  </div>
                                 </div>
-                                <div className="flex items-center space-x-1">
-                                  <Clock className="w-4 h-4" />
-                                  <span>{slot.startTime} - {slot.endTime}</span>
-                                </div>
                               </div>
+                              <Button
+                                onClick={() => handleSlotClick(slot, barber)}
+                                disabled={!slot.isAvailable}
+                                className="mobile-btn-sm ml-3"
+                              >
+                                Book
+                              </Button>
                             </div>
-                            <Button
-                              onClick={() => handleSlotClick(slot, barber)}
-                              disabled={!slot.isAvailable}
-                              className="w-full sm:w-auto"
-                              size="sm"
-                            >
-                              Book Now
-                            </Button>
-                          </div>
-                        );
-                      })
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-        </div>
-
-        {/* Booking Modal */}
-        <BookingModal
-          isOpen={isBookingModalOpen}
-          onClose={() => setIsBookingModalOpen(false)}
-          selectedSlot={selectedSlot ? {
-            ...selectedSlot,
-            date: typeof selectedSlot.date === 'string' ? selectedSlot.date : selectedSlot.date.toISOString().split('T')[0],
-            services: selectedSlot.services || []
-          } : null}
-          selectedBarber={selectedBarberData}
-          onBookingComplete={handleBookingComplete}
-        />
+                          </CardContent>
+                        </Card>
+                      );
+                    })
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
-    </div>
+
+      {/* Booking Modal */}
+      <BookingModal
+        isOpen={isBookingModalOpen}
+        onClose={() => setIsBookingModalOpen(false)}
+        selectedSlot={selectedSlot ? {
+          ...selectedSlot,
+          date: typeof selectedSlot.date === 'string' ? selectedSlot.date : (() => {
+            const d = selectedSlot.date;
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+          })(),
+          services: selectedSlot.services || []
+        } : null}
+        selectedBarber={selectedBarberData}
+        onBookingComplete={handleBookingComplete}
+      />
+    </MobileLayout>
   );
 };
 
