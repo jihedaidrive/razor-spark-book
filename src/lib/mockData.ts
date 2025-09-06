@@ -1,28 +1,7 @@
-import { User, Service, Barber, TimeSlot, Reservation } from '@/types';
+import { Service, Barber, TimeSlot, Reservation } from '@/types';
 
-export const mockUsers: User[] = [
-  {
-    id: '1',
-    phone: '+1234567890',
-    name: 'John Doe',
-    role: 'client',
-    createdAt: new Date(),
-  },
-  {
-    id: 'admin',
-    phone: '+1111111111',
-    name: 'Admin User',
-    role: 'admin',
-    createdAt: new Date(),
-  },
-  {
-    id: 'barber1',
-    phone: '+2222222222',
-    name: 'Mike Johnson',
-    role: 'barber',
-    createdAt: new Date(),
-  },
-];
+// Mock users removed for security reasons
+// export const mockUsers: User[] = [];
 
 export const mockServices: Service[] = [
   {
@@ -31,7 +10,7 @@ export const mockServices: Service[] = [
     description: 'Professional haircut with modern styling techniques',
     duration: 45,
     price: 35,
-    image: '/src/assets/haircut-service.jpg',
+    isActive: true,
   },
   {
     id: '2',
@@ -39,7 +18,7 @@ export const mockServices: Service[] = [
     description: 'Expert beard trimming and shaping for the perfect look',
     duration: 30,
     price: 25,
-    image: '/src/assets/beard-service.jpg',
+    isActive: true,
   },
   {
     id: '3',
@@ -47,15 +26,55 @@ export const mockServices: Service[] = [
     description: 'Deep conditioning and keratin treatments for healthy hair',
     duration: 60,
     price: 75,
-    image: '/src/assets/treatment-service.jpg',
+    isActive: true,
   },
   {
     id: '4',
-    name: 'Soin',
-    description: 'Complete grooming experience with premium products',
+    name: 'Soin du Visage',
+    description: 'Complete facial care and grooming experience',
     duration: 90,
     price: 95,
-    image: '/src/assets/treatment-service.jpg',
+    isActive: true,
+  },
+  {
+    id: '5',
+    name: 'Shampooing Premium',
+    description: 'Professional hair washing with premium products',
+    duration: 20,
+    price: 15,
+    isActive: true,
+  },
+  {
+    id: '6',
+    name: 'Styling',
+    description: 'Professional hair styling and finishing',
+    duration: 30,
+    price: 25,
+    isActive: true,
+  },
+  {
+    id: '7',
+    name: 'Mustache Trim',
+    description: 'Precise mustache trimming and shaping',
+    duration: 20,
+    price: 20,
+    isActive: true,
+  },
+  {
+    id: '8',
+    name: 'Massage Relaxant',
+    description: 'Relaxing head and neck massage',
+    duration: 45,
+    price: 40,
+    isActive: true,
+  },
+  {
+    id: '9',
+    name: 'Conditioning Treatment',
+    description: 'Deep hair conditioning for softness and shine',
+    duration: 35,
+    price: 30,
+    isActive: true,
   },
 ];
 
@@ -63,23 +82,14 @@ export const mockBarbers: Barber[] = [
   {
     id: 'barber1',
     name: 'Mike Johnson',
-    phone: '+2222222222',
-    specialties: ['Haircut', 'Beard Trim'],
-    isActive: true,
   },
   {
     id: 'barber2',
     name: 'Alex Rodriguez',
-    phone: '+3333333333',
-    specialties: ['Hair Treatment', 'Soin'],
-    isActive: true,
   },
   {
     id: 'barber3',
     name: 'Chris Wilson',
-    phone: '+4444444444',
-    specialties: ['Haircut', 'Hair Treatment', 'Soin'],
-    isActive: true,
   },
 ];
 
@@ -104,7 +114,7 @@ const generateTimeSlots = (): TimeSlot[] => {
         slots.push({
           id: `${barber.id}-${date.toISOString().split('T')[0]}-${startTime}`,
           barberId: barber.id,
-          date,
+          date: date.toISOString().split('T')[0],
           startTime,
           endTime,
           isAvailable: Math.random() > 0.3, // 70% chance of being available
@@ -121,35 +131,29 @@ export const mockTimeSlots = generateTimeSlots();
 export const mockReservations: Reservation[] = [
   {
     id: '1',
-    clientId: '1',
     clientName: 'John Doe',
     clientPhone: '+1234567890',
-    barberId: 'barber1',
     barberName: 'Mike Johnson',
     serviceId: '1',
-    serviceName: 'Haircut',
-    date: new Date(Date.now() + 24 * 60 * 60 * 1000), // Tomorrow
+    date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Tomorrow
     startTime: '10:00',
     endTime: '10:45',
     status: 'pending',
-    description: 'Regular trim, not too short',
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    notes: 'Regular trim, not too short',
+    totalDuration: 45,
+    totalPrice: 35,
   },
   {
     id: '2',
-    clientId: '1',
     clientName: 'John Doe',
     clientPhone: '+1234567890',
-    barberId: 'barber2',
     barberName: 'Alex Rodriguez',
     serviceId: '2',
-    serviceName: 'Beard Trim',
-    date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // Day after tomorrow
+    date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Day after tomorrow
     startTime: '14:00',
     endTime: '14:30',
     status: 'confirmed',
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    totalDuration: 30,
+    totalPrice: 25,
   },
 ];

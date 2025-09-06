@@ -247,13 +247,13 @@ const Booking: React.FC = () => {
       </div>
 
       {/* Mobile-First Filters */}
-      <div className="space-y-4 mb-6">
+      <div className="space-y-3 sm:space-y-4 mb-6">
         {/* Barber Selection Card */}
         <Card className="mobile-card">
           <CardContent className="mobile-card-content">
             <label className="text-sm font-medium mb-2 block">Select Barber</label>
             <Select value={selectedBarber} onValueChange={setSelectedBarber}>
-              <SelectTrigger className="mobile-input">
+              <SelectTrigger className="mobile-input h-12">
                 <SelectValue placeholder="Any barber" />
               </SelectTrigger>
               <SelectContent>
@@ -275,7 +275,7 @@ const Booking: React.FC = () => {
           <CardContent className="mobile-card-content">
             <label className="text-sm font-medium mb-2 block">Service (Optional)</label>
             <Select value={selectedService} onValueChange={setSelectedService}>
-              <SelectTrigger className="mobile-input">
+              <SelectTrigger className="mobile-input h-12">
                 <SelectValue placeholder="Any service" />
               </SelectTrigger>
               <SelectContent>
@@ -302,23 +302,25 @@ const Booking: React.FC = () => {
             <div className="flex rounded-xl border-2 p-1 bg-muted/20">
               <button
                 onClick={() => setCalendarView('week')}
-                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 touch-manipulation ${calendarView === 'week'
+                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-3 sm:px-4 rounded-lg text-sm font-medium transition-all duration-200 touch-manipulation min-h-[44px] ${calendarView === 'week'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
                   }`}
               >
                 <Calendar className="w-4 h-4" />
-                <span>Week</span>
+                <span className="hidden sm:inline">Week</span>
+                <span className="sm:hidden">W</span>
               </button>
               <button
                 onClick={() => setCalendarView('list')}
-                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-4 rounded-lg text-sm font-medium transition-all duration-200 touch-manipulation ${calendarView === 'list'
+                className={`flex-1 flex items-center justify-center space-x-2 py-3 px-3 sm:px-4 rounded-lg text-sm font-medium transition-all duration-200 touch-manipulation min-h-[44px] ${calendarView === 'list'
                   ? 'bg-primary text-primary-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
                   }`}
               >
                 <List className="w-4 h-4" />
-                <span>List</span>
+                <span className="hidden sm:inline">List</span>
+                <span className="sm:hidden">L</span>
               </button>
             </div>
           </CardContent>

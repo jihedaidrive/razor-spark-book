@@ -10,28 +10,20 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Service } from '@/types';
 import { Clock, DollarSign } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
-// Import service images
-import haircutImage from '@/assets/haircut-service.jpg';
-import beardImage from '@/assets/beard-service.jpg';
-import treatmentImage from '@/assets/treatment-service.jpg';
-
-// Service type to image mapping
-const serviceImages: Record<string, string> = {
-  'haircut': haircutImage,
-  'beard': beardImage,
-  'treatment': treatmentImage,
-};interface ServiceCardProps {
+// Import service image utility
+import { getServiceImage } from '@/utils/serviceImages';interface ServiceCardProps {
   service: Service;
   onBookClick?: (service: Service) => void;
 }
 
 const ServiceCard: React.FC<ServiceCardProps> = ({ service, onBookClick }) => {
-  // Get image based on service name or fallback to treatment image
+  const { t } = useTranslation();
+  
+  // Get image based on service name using static image mapping
   const imageSrc = useMemo(() => {
-    const serviceLower = service.name.toLowerCase();
-    const imageKey = Object.keys(serviceImages).find(key => serviceLower.includes(key));
-    return imageKey ? serviceImages[imageKey] : treatmentImage;
+    return getServiceImage(service.name);
   }, [service.name]);
 
   return (
@@ -64,7 +56,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, onBookClick }) => {
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
             <div className="flex items-center space-x-1">
               <Clock className="w-4 h-4" />
-              <span>{service.duration} min</span>
+              <span>{service.duration} {t('serviceCard.minutes')}</span>
             </div>
             <div className="flex items-center space-x-1">
               <DollarSign className="w-4 h-4" />
@@ -79,7 +71,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, onBookClick }) => {
             className="w-full btn-primary"
             variant="default"
           >
-            Book Now
+            {t('serviceCard.bookNow')}
           </Button>
         )}
       </CardContent>

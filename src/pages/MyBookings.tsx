@@ -10,6 +10,7 @@ import { reservationsService } from '@/api/reservationsApi';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { 
   Calendar, 
   Clock, 
@@ -305,56 +306,56 @@ const MyBookings: React.FC = () => {
           </p>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - Mobile Responsive */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-6 mb-6">
-          <Card>
+          <Card className="mobile-card">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                Total Bookings
+              <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
+                <Calendar className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-muted-foreground" />
+                <span className="truncate">Total Bookings</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-xl sm:text-2xl font-bold">{myStats.total}</div>
+              <div className="text-lg sm:text-2xl font-bold">{myStats.total}</div>
               <p className="text-xs text-muted-foreground">All time</p>
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="mobile-card">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
-                Completed
+              <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
+                <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-green-600" />
+                <span className="truncate">Completed</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-xl sm:text-2xl font-bold text-green-600">{myStats.completed}</div>
+              <div className="text-lg sm:text-2xl font-bold text-green-600">{myStats.completed}</div>
               <p className="text-xs text-muted-foreground">Finished</p>
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="mobile-card">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <AlertCircle className="h-4 w-4 mr-2 text-blue-600" />
-                Upcoming
+              <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
+                <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-blue-600" />
+                <span className="truncate">Upcoming</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-xl sm:text-2xl font-bold text-blue-600">{myStats.upcomingBookings}</div>
+              <div className="text-lg sm:text-2xl font-bold text-blue-600">{myStats.upcomingBookings}</div>
               <p className="text-xs text-muted-foreground">Scheduled</p>
             </CardContent>
           </Card>
           
-          <Card>
+          <Card className="mobile-card">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <Star className="h-4 w-4 mr-2 text-primary" />
-                Total Spent
+              <CardTitle className="text-xs sm:text-sm font-medium flex items-center">
+                <Star className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 text-primary" />
+                <span className="truncate">Total Spent</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-xl sm:text-2xl font-bold text-primary">${myStats.totalSpent.toFixed(2)}</div>
+              <div className="text-lg sm:text-2xl font-bold text-primary">${myStats.totalSpent.toFixed(2)}</div>
               <p className="text-xs text-muted-foreground">Lifetime</p>
             </CardContent>
           </Card>
@@ -478,7 +479,7 @@ const MyBookings: React.FC = () => {
                               <div className="space-y-1">
                                 <div className="flex items-center text-sm font-medium">
                                   <Calendar className="w-4 h-4 mr-2" />
-                                  {format(new Date(reservation.date), 'MMM d, yyyy')}
+                                  {format(new Date(reservation.date), 'MMM d, yyyy', { locale: fr })}
                                   {isUpcoming && (
                                     <Badge variant="outline" className="ml-2 text-xs">
                                       Upcoming

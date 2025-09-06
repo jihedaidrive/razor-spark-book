@@ -33,15 +33,29 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ open, onClose, service, onS
   }, [service, open]);
 
   const handleSubmit = () => {
-    if (!name || price === '' || duration === '') {
-      alert('Please fill in all required fields');
+    // Validate required fields
+    if (!name || name.trim() === '') {
+      alert('Service name is required');
       return;
     }
+    if (price === '' || isNaN(Number(price)) || Number(price) < 0) {
+      alert('Price must be a valid non-negative number');
+      return;
+    }
+    if (duration === '' || isNaN(Number(duration)) || Number(duration) < 1) {
+      alert('Duration must be a valid positive number (minimum 1 minute)');
+      return;
+    }
+
+    // Convert to proper types
+    const priceNum = Number(price);
+    const durationNum = Number(duration);
+
     onSave({
-      name,
+      name: name.trim(),
       description: description || undefined,
-      price: Number(price),
-      duration: Number(duration),
+      price: priceNum,
+      duration: durationNum,
       isActive: true
     });
   };
@@ -73,6 +87,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ open, onClose, service, onS
             step="0.01"
             value={price}
             onChange={(e) => setPrice(Number(e.target.value))}
+            placeholder="0.00"
           />
         </div>
 
@@ -80,8 +95,11 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ open, onClose, service, onS
           <label className="block text-sm font-medium">Duration (minutes)</label>
           <Input
             type="number"
+            min="1"
+            step="1"
             value={duration}
             onChange={(e) => setDuration(Number(e.target.value))}
+            placeholder="30"
           />
         </div>
 

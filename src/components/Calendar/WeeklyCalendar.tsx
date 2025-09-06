@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { UiTimeSlot, UiBarber } from '@/types';
 import { ChevronLeft, ChevronRight, Clock, User } from 'lucide-react';
 import { format, startOfWeek, addDays, isSameDay, addWeeks, subWeeks, isToday, isPast, isFuture, parseISO, set } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface WeeklyCalendarProps {
   timeSlots: UiTimeSlot[];
@@ -16,8 +17,8 @@ interface WeeklyCalendarProps {
 }
 
 const BUSINESS_HOURS = {
-  start: 9, // 9 AM
-  end: 18, // 6 PM
+  start: 12, // 9 AM
+  end: 24, // 6 PM
 };
 
 const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
@@ -79,7 +80,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
           ...existingSlot,
           isAvailable: false,
           status: 'reserved' as const
-        };
+        } as UiTimeSlot;
       }
       
       // If cancelled, treat as available
@@ -88,7 +89,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
           ...existingSlot,
           isAvailable: true,
           status: 'available' as const
-        };
+        } as UiTimeSlot;
       }
       
       return existingSlot;
@@ -112,7 +113,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
         isAvailable: false,
         status: 'reserved' as const,
         services: []
-      };
+      } as UiTimeSlot;
     }
 
     // If no slot exists and not busy, create a new available slot
@@ -125,7 +126,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
       isAvailable: true,
       status: 'available' as const,
       services: []
-    };
+    } as UiTimeSlot;
   };
 
   const workingHours = Array.from(
@@ -192,23 +193,23 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
         </div>
       </CardHeader>
       
-      <CardContent className="px-1 sm:px-6">
-        <div className="overflow-x-auto -mx-1 sm:mx-0">
-          <div className="w-full min-w-0 px-1 sm:px-0">
+      <CardContent className="px-2 sm:px-6">
+        <div className="overflow-x-auto -mx-2 sm:mx-0">
+          <div className="w-full min-w-0 px-2 sm:px-0">
             {/* Header with days - Mobile optimized */}
-            <div className="grid grid-cols-7 gap-0.5 sm:gap-2 mb-2 sm:mb-4">
-              <div className="font-medium text-xs sm:text-sm text-muted-foreground p-0.5 sm:p-2 text-center">
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-3 sm:mb-4">
+              <div className="font-medium text-xs sm:text-sm text-muted-foreground p-1 sm:p-2 text-center">
                 <span className="hidden sm:inline">Time</span>
                 <span className="sm:hidden">T</span>
               </div>
               {workingDays.map(day => (
-                <div key={day.toISOString()} className="text-center p-0.5 sm:p-2">
+                <div key={day.toISOString()} className="text-center p-1 sm:p-2">
                   <div className="font-medium text-xs sm:text-sm">
-                    <span className="hidden sm:inline">{format(day, 'EEE')}</span>
-                    <span className="sm:hidden">{format(day, 'EEEEE')}</span>
+                    <span className="hidden sm:inline">{format(day, 'EEE', { locale: fr })}</span>
+                    <span className="sm:hidden">{format(day, 'EEEEE', { locale: fr })}</span>
                   </div>
                   <div className="text-xs text-muted-foreground hidden sm:block">
-                    {format(day, 'MMM d')}
+                    {format(day, 'MMM d', { locale: fr })}
                   </div>
                   <div className="text-xs text-muted-foreground sm:hidden">
                     {format(day, 'd')}
@@ -218,18 +219,18 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
             </div>
 
             {/* Calendar Grid */}
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {filteredBarbers.map(barber => (
-                <div key={barber.id} className="border rounded-lg p-4">
+                <div key={barber.id} className="border rounded-lg p-3 sm:p-4">
                   <div className="flex items-center space-x-2 mb-3">
                     <User className="w-4 h-4 text-primary" />
-                    <span className="font-medium">{barber.name}</span>
+                    <span className="font-medium text-sm sm:text-base">{barber.name}</span>
                   </div>
                   
                   {workingHours.map(hour => (
-                    <div key={hour} className="grid grid-cols-7 gap-0.5 sm:gap-2 mb-1 sm:mb-2">
-                      <div className="text-xs sm:text-sm text-muted-foreground p-0.5 sm:p-2 flex items-center justify-center">
-                        <span className="transform -rotate-90 sm:rotate-0 whitespace-nowrap text-xs">
+                    <div key={hour} className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 sm:mb-2">
+                      <div className="text-xs sm:text-sm text-muted-foreground p-1 sm:p-2 flex items-center justify-center">
+                        <span className="transform -rotate-90 sm:rotate-0 whitespace-nowrap text-xs font-medium">
                           {hour.replace(':00', '')}
                         </span>
                       </div>
@@ -299,15 +300,17 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
                         }
                         
                         return (
-                          <div key={`${day.toISOString()}-${hour}`} className="p-0 sm:p-1">
+                          <div key={`${day.toISOString()}-${hour}`} className="p-0.5 sm:p-1">
                             <Button
                               variant={buttonVariant}
                               size="sm"
-                              className={`w-full h-6 sm:h-8 text-xs calendar-slot ${buttonClass} touch-manipulation px-1`}
+                              className={`w-full h-8 sm:h-8 text-xs calendar-slot ${buttonClass} touch-manipulation px-1 min-h-[32px]`}
                               onClick={() => !isDisabled && onSlotClick(slot, barber)}
                               disabled={isDisabled}
                             >
-                              {buttonText}
+                              <span className="truncate text-xs font-medium">
+                                {buttonText}
+                              </span>
                             </Button>
                           </div>
                         );

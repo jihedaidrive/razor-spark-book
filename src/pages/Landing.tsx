@@ -8,6 +8,7 @@ import { Service } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { Calendar, Scissors, Star, Users, Clock, Phone, MapPin, Award, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 import heroImage from '@/assets/hero-barber.jpg';
 import haircutImage from '@/assets/haircut-service.jpg';
 import beardImage from '@/assets/beard-service.jpg';
@@ -18,6 +19,7 @@ const Landing: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -60,17 +62,17 @@ const Landing: React.FC = () => {
         {/* Mobile-first Hero Content */}
         <div className="relative z-10 px-6 py-16 text-center text-white max-w-sm sm:max-w-2xl mx-auto">
           <h1 className="text-3xl sm:text-5xl md:text-7xl font-extrabold mb-4 sm:mb-6 tracking-tight leading-tight">
-            Masters of <span className="text-secondary">Style</span>
+            {t('landing.hero.title')}
           </h1>
           <p className="text-base sm:text-lg md:text-2xl mb-6 sm:mb-8 text-white/90 leading-relaxed">
-            Expert grooming with traditional craftsmanship and modern style.
+            {t('landing.hero.subtitle')}
           </p>
           
           {/* Mobile-optimized CTA Buttons */}
           <div className="space-y-3 sm:space-y-0 sm:flex sm:justify-center sm:gap-4 mb-8 sm:mb-12">
             <Button size="lg" variant="secondary" className="mobile-btn w-full sm:w-auto" asChild>
               <Link to={user ? "/booking" : "/register"}>
-                <Calendar className="w-5 h-5 mr-2" /> Book Now
+                <Calendar className="w-5 h-5 mr-2" /> {t('landing.hero.cta')}
               </Link>
             </Button>
             <Button
@@ -78,7 +80,7 @@ const Landing: React.FC = () => {
               variant="outline"
               className="mobile-btn w-full sm:w-auto border-2 border-white text-white hover:bg-white hover:text-primary"
             >
-              Our Services
+              {t('navigation.services')}
             </Button>
           </div>
 
@@ -183,10 +185,10 @@ const Landing: React.FC = () => {
         <div className="space-y-8 sm:space-y-16">
           <div className="text-center">
             <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 text-foreground">
-              Premium <span className="text-primary">Services</span>
+              {t('landing.services.title')}
             </h2>
             <p className="text-base sm:text-xl text-muted-foreground leading-relaxed">
-              Professional grooming services tailored to enhance your style.
+              {t('landing.services.subtitle')}
             </p>
           </div>
 

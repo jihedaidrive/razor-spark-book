@@ -3,11 +3,13 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Calendar, Home, LogOut, Settings, User, History, Menu, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const Navigation: React.FC = () => {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t } = useTranslation();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -34,7 +36,7 @@ const Navigation: React.FC = () => {
               >
                 <Link to="/">
                   <Home className="w-4 h-4 mr-2" />
-                  Home
+                  {t('navigation.home')}
                 </Link>
               </Button>
 
@@ -47,7 +49,7 @@ const Navigation: React.FC = () => {
                   >
                     <Link to="/booking">
                       <Calendar className="w-4 h-4 mr-2" />
-                      Book
+                      {t('navigation.booking')}
                     </Link>
                   </Button>
                   <Button
@@ -57,7 +59,7 @@ const Navigation: React.FC = () => {
                   >
                     <Link to="/my-bookings">
                       <History className="w-4 h-4 mr-2" />
-                      My History
+                      {t('navigation.myBookings')}
                     </Link>
                   </Button>
                 </>

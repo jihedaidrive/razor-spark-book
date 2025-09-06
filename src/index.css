@@ -250,6 +250,35 @@ All colors MUST be HSL.
   .mobile-container {
     @apply px-4 py-4 max-w-md mx-auto sm:max-w-2xl lg:max-w-4xl xl:max-w-6xl;
   }
+
+  /* Mobile calendar improvements */
+  .calendar-slot {
+    @apply min-h-[32px] touch-manipulation;
+  }
+
+  /* Mobile modal improvements */
+  .mobile-modal {
+    @apply w-[95vw] max-w-md max-h-[90vh] overflow-y-auto;
+  }
+
+  /* Mobile table improvements */
+  .mobile-table {
+    @apply text-xs sm:text-sm;
+  }
+
+  /* Mobile button improvements */
+  .mobile-btn {
+    @apply min-h-[44px] touch-manipulation;
+  }
+
+  /* Mobile card improvements */
+  .mobile-card {
+    @apply p-3 sm:p-4 rounded-lg;
+  }
+
+  .mobile-card-content {
+    @apply p-3 sm:p-4;
+  }
 }
 
 @keyframes fadeIn {

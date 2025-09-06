@@ -1,7 +1,7 @@
 import axiosClient from './axiosClient';
 import { Service } from '@/types';
 
-// DTO matching backend CreateServiceDto
+// DTO matching backend CreateServiceDto exactly
 export interface CreateServiceData {
   name: string;
   duration: number; // in minutes
@@ -11,6 +11,7 @@ export interface CreateServiceData {
 // DTO matching backend UpdateServiceDto
 export interface UpdateServiceData {
   name?: string;
+  description?: string;
   duration?: number;
   price?: number;
   isActive?: boolean;
@@ -61,15 +62,31 @@ export const servicesApi = {
     try {
       console.log('Creating service with data:', data);
 
-      // Clean and validate data to match backend DTO
+      // Clean and validate data to match backend DTO exactly
       const cleanData: CreateServiceData = {
         name: data.name.trim(),
         price: Number(data.price),
         duration: Number(data.duration)
       };
 
-      // Use the correct backend endpoint: POST /services/create
-      const response = await axiosClient.post<Service>('/services/create', cleanData);
+      // Validate data types and values
+      if (!cleanData.name || cleanData.name.length === 0) {
+        throw new Error('Service name is required and cannot be empty');
+      }
+      if (isNaN(cleanData.duration) || cleanData.duration < 1) {
+        throw new Error('Duration must be a positive number (minimum 1 minute)');
+      }
+      if (isNaN(cleanData.price) || cleanData.price < 0) {
+        throw new Error('Price must be a non-negative number (minimum 0)');
+      }
+
+      // Send data directly without any wrapper - backend expects exact DTO structure
+      const response = await axiosClient.post<Service>('/services/create', {
+        name: cleanData.name,
+        duration: cleanData.duration,
+        price: cleanData.price
+      });
+
       console.log('Service created successfully:', response.data);
       return { ...response.data, id: (response.data as Service & { _id?: string })._id || response.data.id };
     } catch (error: unknown) {
@@ -89,7 +106,14 @@ export const servicesApi = {
       if (err.response?.status === 404) {
         throw new Error('Service creation endpoint not found. Please check your backend configuration.');
       } else if (err.response?.status === 400) {
-        throw new Error((err.response?.data as { message?: string })?.message || 'Invalid service data provided');
+        const errorData = err.response?.data as { message?: string | string[] };
+        if (Array.isArray(errorData?.message)) {
+          throw new Error(`Backend validation failed: ${errorData.message.join(', ')}`);
+        } else if (typeof errorData?.message === 'string') {
+          throw new Error(`Backend validation failed: ${errorData.message}`);
+        } else {
+          throw new Error('Invalid service data provided. Please check the backend DTO configuration.');
+        }
       } else if (err.response?.status === 401) {
         throw new Error('Authentication required to create services');
       } else if (err.response?.status === 403) {
@@ -125,8 +149,15 @@ export const servicesApi = {
       if (data.duration !== undefined) cleanData.duration = Number(data.duration);
       if (data.isActive !== undefined) cleanData.isActive = data.isActive;
 
-      // Use PUT method to match backend controller
-      const response = await axiosClient.put<Service>(`/services/${id}`, cleanData);
+      // Send data directly without any wrapper - backend expects exact DTO structure
+      const updateData: any = {};
+      if (data.name !== undefined) updateData.name = data.name.trim();
+      if (data.price !== undefined) updateData.price = Number(data.price);
+      if (data.duration !== undefined) updateData.duration = Number(data.duration);
+      if (data.isActive !== undefined) updateData.isActive = data.isActive;
+
+      const response = await axiosClient.put<Service>(`/services/${id}`, updateData);
+
       console.log('Service updated successfully:', response.data);
       return { ...response.data, id: (response.data as Service & { _id?: string })._id || response.data.id };
     } catch (error: unknown) {
@@ -144,7 +175,14 @@ export const servicesApi = {
       if (err.response?.status === 404) {
         throw new Error('Service not found or update endpoint not available');
       } else if (err.response?.status === 400) {
-        throw new Error((err.response?.data as { message?: string })?.message || 'Invalid service data provided');
+        const errorData = err.response?.data as { message?: string | string[] };
+        if (Array.isArray(errorData?.message)) {
+          throw new Error(errorData.message.join(', '));
+        } else if (typeof errorData?.message === 'string') {
+          throw new Error(errorData.message);
+        } else {
+          throw new Error('Invalid service data provided');
+        }
       }
 
       throw error;

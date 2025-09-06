@@ -101,7 +101,8 @@ const sanitizeRequestData = (data: any): any => {
   // Fields that should NOT be sanitized (preserve exact values)
   const preserveFields = [
     'date', 'startTime', 'endTime', 'serviceId', 'serviceIds', 
-    'barberName', 'id', '_id', 'status', 'role', 'password'
+    'barberName', 'id', '_id', 'status', 'role', 'password',
+    'name', 'duration', 'price', 'isActive' // Service fields
   ];
   
   for (const [key, value] of Object.entries(data)) {

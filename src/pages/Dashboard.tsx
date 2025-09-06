@@ -15,6 +15,7 @@ import { Calendar, Clock, Users, CheckCircle, XCircle, AlertCircle, User, Scisso
 import ServiceModal from '@/components/services/ServiceModal';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { useTranslation } from 'react-i18next';
 // Import centralized barber configuration for consistency
 import { BARBERS } from '@/config/barbers';
 
@@ -32,6 +33,7 @@ const ReservationHistory: React.FC<ReservationHistoryProps> = ({
   onStatusUpdate, 
   userRole 
 }) => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<string>('all');
@@ -444,6 +446,7 @@ const Dashboard: React.FC = () => {
   // State Management
   // -----------------------
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('reservations');
@@ -711,10 +714,17 @@ const Dashboard: React.FC = () => {
       console.log('Dashboard: Saving service:', { selectedService, serviceData });
       
       if (selectedService) {
+        // For updates, we can include all fields
         await servicesApi.updateService(selectedService.id, serviceData);
         toast({ title: "Success", description: "Service updated successfully" });
       } else {
-        await servicesApi.createService(serviceData as CreateServiceData);
+        // For creation, only send the fields that the backend expects
+        const createData: CreateServiceData = {
+          name: serviceData.name!,
+          duration: serviceData.duration!,
+          price: serviceData.price!
+        };
+        await servicesApi.createService(createData);
         toast({ title: "Success", description: "Service created successfully" });
       }
       
@@ -783,57 +793,57 @@ const Dashboard: React.FC = () => {
           <p className="text-muted-foreground">Welcome back, {user.name}</p>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
+        {/* Statistics Cards - Mobile Responsive */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+          <Card className="mobile-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
-              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-xs sm:text-sm font-medium">Total Bookings</CardTitle>
+              <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.total}</div>
+              <div className="text-lg sm:text-2xl font-bold">{stats.total}</div>
               <p className="text-xs text-muted-foreground">All time bookings</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="mobile-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending</CardTitle>
-              <AlertCircle className="h-4 w-4 text-warning" />
+              <CardTitle className="text-xs sm:text-sm font-medium">Pending</CardTitle>
+              <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 text-warning" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-warning">{stats.pending}</div>
+              <div className="text-lg sm:text-2xl font-bold text-warning">{stats.pending}</div>
               <p className="text-xs text-muted-foreground">Awaiting confirmation</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="mobile-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Confirmed</CardTitle>
-              <CheckCircle className="h-4 w-4 text-success" />
+              <CardTitle className="text-xs sm:text-sm font-medium">Confirmed</CardTitle>
+              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-success" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-success">{stats.confirmed}</div>
+              <div className="text-lg sm:text-2xl font-bold text-success">{stats.confirmed}</div>
               <p className="text-xs text-muted-foreground">Ready to serve</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="mobile-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Completed</CardTitle>
-              <CheckCircle className="h-4 w-4 text-primary" />
+              <CardTitle className="text-xs sm:text-sm font-medium">Completed</CardTitle>
+              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.completed}</div>
+              <div className="text-lg sm:text-2xl font-bold">{stats.completed}</div>
               <p className="text-xs text-muted-foreground">Successfully served</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs - Mobile Responsive */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="reservations">Active</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
-            <TabsTrigger value="calendar">Calendar</TabsTrigger>
-            <TabsTrigger value="services">Services</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4 h-10 sm:h-11">
+            <TabsTrigger value="reservations" className="text-xs sm:text-sm px-2 sm:px-4">Active</TabsTrigger>
+            <TabsTrigger value="history" className="text-xs sm:text-sm px-2 sm:px-4">History</TabsTrigger>
+            <TabsTrigger value="calendar" className="text-xs sm:text-sm px-2 sm:px-4">Calendar</TabsTrigger>
+            <TabsTrigger value="services" className="text-xs sm:text-sm px-2 sm:px-4">Services</TabsTrigger>
           </TabsList>
 
           {/* Services Tab */}

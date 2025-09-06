@@ -11,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { format, formatISO } from 'date-fns';
 import { User, Calendar, Scissors } from 'lucide-react';
 import { sanitizeNotes, sanitizeHtml } from '@/utils/security';
+import { useTranslation } from 'react-i18next';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export default function BookingModal({
   selectedBarber,
   onBookingComplete
 }: BookingModalProps) {
+  const { t } = useTranslation();
   const [notes, setNotes] = useState('');
   const [services, setServices] = useState<Service[]>([]);
   const [selectedServices, setSelectedServices] = useState<Service[]>([]);
@@ -188,9 +190,9 @@ export default function BookingModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
-      <DialogContent className="w-[95vw] max-w-md max-h-[85vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl fixed bottom-0 sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:bottom-auto">
+      <DialogContent className="w-[95vw] max-w-md max-h-[90vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl fixed bottom-0 sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:bottom-auto mx-auto">
         <DialogHeader className="pb-4 border-b">
-          <DialogTitle className="text-xl font-bold text-center">Confirm Booking</DialogTitle>
+          <DialogTitle className="text-xl font-bold text-center">{t('bookingModal.title')}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -223,15 +225,15 @@ export default function BookingModal({
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <Scissors className="w-5 h-5 text-primary" />
-              <h3 className="font-semibold">Select Services</h3>
+              <h3 className="font-semibold">{t('bookingModal.selectServices')}</h3>
             </div>
             
             {/* Service Cards */}
-            <div className="space-y-3 max-h-64 overflow-y-auto">
+            <div className="space-y-2 sm:space-y-3 max-h-64 overflow-y-auto">
               {services.map(service => (
                 <div 
                   key={service.id} 
-                  className={`p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer touch-manipulation ${
+                  className={`p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer touch-manipulation min-h-[60px] ${
                     selectedServices.some(s => s.id === service.id)
                       ? 'border-primary bg-primary/5 shadow-md'
                       : 'border-border hover:border-primary/50 hover:bg-muted/30'
@@ -243,15 +245,15 @@ export default function BookingModal({
                       id={service.id}
                       checked={selectedServices.some(s => s.id === service.id)}
                       onCheckedChange={(checked) => handleServiceToggle(service, checked as boolean)}
-                      className="pointer-events-none"
+                      className="pointer-events-none flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium">{service.name}</h4>
+                      <h4 className="font-medium text-sm sm:text-base truncate">{service.name}</h4>
                       <div className="flex items-center justify-between mt-1">
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-xs sm:text-sm text-muted-foreground">
                           {service.duration} min
                         </span>
-                        <span className="text-lg font-bold text-primary">
+                        <span className="text-base sm:text-lg font-bold text-primary">
                           ${service.price}
                         </span>
                       </div>
@@ -291,7 +293,7 @@ export default function BookingModal({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">Notes (Optional)</label>
+            <label className="text-sm font-medium">{t('bookingModal.notes')}</label>
             <Input 
               value={notes} 
               onChange={e => {
@@ -301,12 +303,12 @@ export default function BookingModal({
                   setNotes(value.replace(/[<>]/g, ''));
                 }
               }}
-              placeholder="Any special requests or preferences..."
+              placeholder={t('bookingModal.notesPlaceholder')}
               className="h-12 px-4 rounded-xl border-2 focus:border-primary"
               maxLength={500}
             />
             <div className="text-xs text-muted-foreground">
-              {notes.length}/500 characters
+              {notes.length}/500 {t('bookingModal.characters')}
             </div>
           </div>
 
@@ -317,7 +319,7 @@ export default function BookingModal({
               onClick={onClose}
               className="w-full sm:w-auto order-2 sm:order-1"
             >
-              Cancel
+              {t('bookingModal.cancel')}
             </Button>
             <Button 
               onClick={handleConfirm}
@@ -328,8 +330,8 @@ export default function BookingModal({
                 <Calendar className="w-4 h-4" />
                 <span>
                   {selectedServices.length === 0 
-                    ? 'Select Services' 
-                    : `Book Now - $${totalPrice}`
+                    ? t('bookingModal.selectServicesButton') 
+                    : `${t('bookingModal.bookNowButton')} - $${totalPrice}`
                   }
                 </span>
               </div>

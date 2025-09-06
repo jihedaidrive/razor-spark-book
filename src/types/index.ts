@@ -2,6 +2,7 @@
 export interface Service {
   id: string; // MongoDB _id mapped to id
   name: string; // e.g. "Haircut", "Beard Trim"
+  description?: string; // service description
   duration: number; // in minutes, e.g. 30, 45, 60
   price: number; // service price
   isActive: boolean; // enable/disable service (default: true)
@@ -31,7 +32,7 @@ export interface UiTimeSlot {
   endTime: string;
   barberId: string;
   isAvailable: boolean;
-  status?: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'past';
+  status?: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'past' | 'reserved' | 'available';
   clientName?: string;
   clientPhone?: string;
   service?: string;
