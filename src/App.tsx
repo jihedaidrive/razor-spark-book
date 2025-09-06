@@ -41,25 +41,31 @@ const SecurityWrapper = ({ children }: { children: React.ReactNode }) => {
   const security = useSecurity();
 
   useEffect(() => {
-    // Set security headers if possible
-    const metaCSP = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
-    if (!metaCSP && import.meta.env.PROD) {
-      const meta = document.createElement('meta');
-      meta.httpEquiv = 'Content-Security-Policy';
-      meta.content = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;";
-      document.head.appendChild(meta);
-    }
-
-    // Disable right-click in production (optional)
     if (import.meta.env.PROD) {
-      const handleContextMenu = (e: MouseEvent) => {
-        e.preventDefault();
-      };
-      document.addEventListener('contextmenu', handleContextMenu);
-      return () => document.removeEventListener('contextmenu', handleContextMenu);
+      const metaCSP = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
+      if (!metaCSP) {
+        const meta = document.createElement("meta");
+        meta.httpEquiv = "Content-Security-Policy";
+        meta.content = `
+          default-src 'self';
+          connect-src 'self' https://stupid-mary-jsexpress-10bb21b8.koyeb.app;
+          frame-src 'self' https://vercel.live;
+          script-src 'self' 'unsafe-inline' 'unsafe-eval';
+          style-src 'self' 'unsafe-inline';
+          img-src 'self' data: https:;
+        `.replace(/\s{2,}/g, " "); // compress whitespace
+        document.head.appendChild(meta);
+      }
+    }
+  
+    // Optional right-click disable
+    if (import.meta.env.PROD) {
+      const handleContextMenu = (e: MouseEvent) => e.preventDefault();
+      document.addEventListener("contextmenu", handleContextMenu);
+      return () => document.removeEventListener("contextmenu", handleContextMenu);
     }
   }, []);
-
+  
   return <>{children}</>;
 };
 
