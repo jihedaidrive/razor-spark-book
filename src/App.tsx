@@ -48,7 +48,7 @@ const SecurityWrapper = ({ children }: { children: React.ReactNode }) => {
         meta.httpEquiv = "Content-Security-Policy";
         meta.content = `
           default-src 'self';
-          connect-src 'self' https://stupid-mary-jsexpress-10bb21b8.koyeb.app;
+          connect-src 'self' https://barber-backend-4817.onrender.com;
           frame-src 'self' https://vercel.live;
           script-src 'self' 'unsafe-inline' 'unsafe-eval';
           style-src 'self' 'unsafe-inline';
