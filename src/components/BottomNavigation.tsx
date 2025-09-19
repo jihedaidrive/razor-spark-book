@@ -10,10 +10,12 @@ import {
   LogIn
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 const BottomNavigation: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
+  const { t } = useTranslation();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -25,44 +27,39 @@ const BottomNavigation: React.FC = () => {
   const navItems = user ? [
     {
       icon: Home,
-      label: 'Home',
+      label: t('navigation.home'),
       path: '/',
       show: true
     },
     {
       icon: Calendar,
-      label: 'Book',
+      label: t('navigation.booking'),
       path: '/booking',
       show: user.role === 'user' || user.role === 'admin'
     },
     {
       icon: History,
-      label: 'History',
+      label: t('navigation.myBookings'),
       path: '/my-bookings',
       show: user.role === 'user' || user.role === 'admin'
     },
     {
       icon: Settings,
-      label: 'Admin',
+      label: t('navigation.dashboard'),
       path: '/dashboard',
       show: user.role === 'admin'
     },
-    {
-      icon: User,
-      label: 'Profile',
-      path: '/profile',
-      show: true
-    }
+ 
   ] : [
     {
       icon: Home,
-      label: 'Home',
+      label: t('navigation.home'),
       path: '/',
       show: true
     },
     {
       icon: LogIn,
-      label: 'Login',
+      label: t('navigation.login'),
       path: '/login',
       show: true
     }

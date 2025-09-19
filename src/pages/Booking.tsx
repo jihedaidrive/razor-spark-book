@@ -27,6 +27,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { Calendar, List, User, Scissors, Clock } from 'lucide-react';
 import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 // Types
 import { CalendarView, UiTimeSlot, UiBarber, Service, Reservation } from '@/types';
@@ -38,6 +39,7 @@ import { getActiveBarbers } from '@/config/barbers';
 const Booking: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [services, setServices] = useState<Service[]>([]);

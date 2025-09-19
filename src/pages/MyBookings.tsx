@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 import { 
   Calendar, 
   Clock, 
@@ -31,6 +32,7 @@ import {
 
 const MyBookings: React.FC = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');

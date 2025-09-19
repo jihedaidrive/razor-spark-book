@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, Phone, Lock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const LoginForm: React.FC = () => {
   const [phone, setPhone] = useState('');
@@ -14,12 +15,13 @@ const LoginForm: React.FC = () => {
   const [phoneError, setPhoneError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // PHONE VALIDATION: Must be exactly 8 digits
   const validatePhone = (phoneNumber: string): boolean => {
     const cleanPhone = phoneNumber.replace(/\D/g, ''); // Remove non-digits
     if (cleanPhone.length !== 8) {
-      setPhoneError('Phone number must be exactly 8 digits');
+      setPhoneError(t('validation.phoneInvalid'));
       return false;
     }
     setPhoneError('');
@@ -31,7 +33,7 @@ const LoginForm: React.FC = () => {
     // Only allow digits and limit to 8 characters
     const cleanValue = value.replace(/\D/g, '').slice(0, 8);
     setPhone(cleanValue);
-    
+
     // Clear error when user starts typing
     if (phoneError) {
       setPhoneError('');
@@ -40,12 +42,12 @@ const LoginForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate phone number before submission
     if (!validatePhone(phone)) {
       return;
     }
-    
+
     if (!password) {
       return;
     }
@@ -68,22 +70,22 @@ const LoginForm: React.FC = () => {
           <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-primary-foreground font-bold text-2xl">B</span>
           </div>
-          <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('auth.welcomeBack')}</CardTitle>
           <CardDescription>
-            Sign in to your account to book appointments
+            {t('auth.login')}
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone">{t('forms.phone')}</Label>
               <div className="relative">
                 <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="12345678"
+                  placeholder={t('forms.phonePlaceholder')}
                   value={phone}
                   onChange={handlePhoneChange}
                   className={`pl-10 ${phoneError ? 'border-destructive' : ''}`}
@@ -94,17 +96,17 @@ const LoginForm: React.FC = () => {
               {phoneError && (
                 <p className="text-sm text-destructive">{phoneError}</p>
               )}
-              <p className="text-xs text-muted-foreground">Enter exactly 8 digits</p>
+              <p className="text-xs text-muted-foreground">{t('forms.phonePlaceholder')}</p>
             </div>
-            
+
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('forms.password')}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={t('forms.passwordPlaceholder')}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10"
@@ -112,14 +114,14 @@ const LoginForm: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <Button
               type="submit"
               className="w-full"
               disabled={isLoading || !phone || !password || phoneError !== ''}
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign In
+              {t('forms.loginButton')}
             </Button>
           </form>
 
@@ -129,7 +131,7 @@ const LoginForm: React.FC = () => {
               to="/register"
               className="text-primary hover:text-primary/80 font-medium"
             >
-              Sign up
+              {t('auth.register')}
             </Link>
           </div>
         </CardContent>

@@ -27,11 +27,11 @@ interface ReservationHistoryProps {
   userRole?: string;
 }
 
-const ReservationHistory: React.FC<ReservationHistoryProps> = ({ 
-  reservations, 
-  isLoading, 
-  onStatusUpdate, 
-  userRole 
+const ReservationHistory: React.FC<ReservationHistoryProps> = ({
+  reservations,
+  isLoading,
+  onStatusUpdate,
+  userRole
 }) => {
   const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,7 +41,7 @@ const ReservationHistory: React.FC<ReservationHistoryProps> = ({
   const itemsPerPage = 15;
 
   // Get all reservations (including completed and cancelled) for history
-  const allReservations = React.useMemo(() => 
+  const allReservations = React.useMemo(() =>
     reservations.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
     [reservations]
   );
@@ -52,7 +52,7 @@ const ReservationHistory: React.FC<ReservationHistoryProps> = ({
 
     // Search filter
     if (searchTerm) {
-      filtered = filtered.filter(r => 
+      filtered = filtered.filter(r =>
         r.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         r.clientPhone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         r.barberName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -69,7 +69,7 @@ const ReservationHistory: React.FC<ReservationHistoryProps> = ({
     if (dateFilter !== 'all') {
       const now = new Date();
       const filterDate = new Date();
-      
+
       switch (dateFilter) {
         case 'today':
           filterDate.setHours(0, 0, 0, 0);
@@ -137,7 +137,16 @@ const ReservationHistory: React.FC<ReservationHistoryProps> = ({
   };
 
   const exportToCSV = () => {
-    const headers = ['Date', 'Time', 'Client', 'Phone', 'Barber', 'Services', 'Status', 'Price'];
+    const headers = [
+      t('dashboard.history.table.date'),
+      t('dashboard.history.table.time'),
+      t('dashboard.history.table.client'),
+      t('dashboard.history.table.phone'),
+      t('dashboard.history.table.barber'),
+      t('dashboard.history.table.services'),
+      t('dashboard.history.table.status'),
+      t('dashboard.history.table.price')
+    ];
     const csvData = filteredReservations.map(r => [
       format(new Date(r.date), 'yyyy-MM-dd'),
       r.startTime,
@@ -168,7 +177,7 @@ const ReservationHistory: React.FC<ReservationHistoryProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <History className="w-5 h-5" />
-            <span>Loading History...</span>
+            <span>{t('dashboard.history.loadingHistory')}</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -191,15 +200,15 @@ const ReservationHistory: React.FC<ReservationHistoryProps> = ({
             <div>
               <CardTitle className="flex items-center space-x-2">
                 <History className="w-5 h-5" />
-                <span>Reservation History</span>
+                <span>{t('dashboard.history.title')}</span>
               </CardTitle>
               <CardDescription>
-                Complete history of all reservations with filtering and search
+                {t('dashboard.history.description')}
               </CardDescription>
             </div>
             <Button onClick={exportToCSV} variant="outline" size="sm">
               <Download className="w-4 h-4 mr-2" />
-              Export CSV
+              {t('dashboard.history.exportCSV')}
             </Button>
           </div>
         </CardHeader>
@@ -208,23 +217,23 @@ const ReservationHistory: React.FC<ReservationHistoryProps> = ({
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
             <div className="text-center">
               <div className="text-2xl font-bold">{historyStats.total}</div>
-              <div className="text-xs text-muted-foreground">Total</div>
+              <div className="text-xs text-muted-foreground">{t('dashboard.history.stats.totalReservations')}</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">{historyStats.completed}</div>
-              <div className="text-xs text-muted-foreground">Completed</div>
+              <div className="text-xs text-muted-foreground">{t('dashboard.stats.completed')}</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-600">{historyStats.confirmed}</div>
-              <div className="text-xs text-muted-foreground">Confirmed</div>
+              <div className="text-xs text-muted-foreground">{t('dashboard.stats.confirmed')}</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-red-600">{historyStats.cancelled}</div>
-              <div className="text-xs text-muted-foreground">Cancelled</div>
+              <div className="text-xs text-muted-foreground">{t('dashboard.reservations.status_cancelled')}</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-primary">${historyStats.totalRevenue.toFixed(2)}</div>
-              <div className="text-xs text-muted-foreground">Revenue</div>
+              <div className="text-xs text-muted-foreground">{t('dashboard.history.stats.totalRevenue')}</div>
             </div>
           </div>
 
@@ -233,7 +242,7 @@ const ReservationHistory: React.FC<ReservationHistoryProps> = ({
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search client, phone, barber..."
+                placeholder={t('dashboard.history.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -461,10 +470,10 @@ const Dashboard: React.FC = () => {
   // Memoized calendar data - FIXED VERSION
   const { calendarSlots, barbers } = React.useMemo(() => {
     console.log('Dashboard: Generating calendar data from reservations:', reservations);
-    
+
     // Create barbers list from centralized config, filtered by those with reservations
     const reservationBarberNames = [...new Set(reservations.map(r => r.barberName))];
-    const uniqueBarbers: UiBarber[] = BARBERS.filter(barber => 
+    const uniqueBarbers: UiBarber[] = BARBERS.filter(barber =>
       reservationBarberNames.includes(barber.name)
     );
 
@@ -537,10 +546,10 @@ const Dashboard: React.FC = () => {
     setIsLoading(true);
     try {
       if (!user) return;
-      
+
       const params = user.role === 'admin' ? {} : { clientId: user.id };
       const fetchedReservations = await reservationsService.getReservations(params);
-      
+
       const validReservations = (fetchedReservations || []).map(res => ({
         ...res,
         id: res._id || res.id
@@ -566,10 +575,10 @@ const Dashboard: React.FC = () => {
   const handleStatusUpdate = async (reservationId: string, newStatus: Reservation['status']) => {
     if (!reservationId) {
       console.error('Attempted to update reservation with no ID');
-      toast({ 
-        title: "Error", 
-        description: "Invalid reservation ID", 
-        variant: "destructive" 
+      toast({
+        title: "Error",
+        description: "Invalid reservation ID",
+        variant: "destructive"
       });
       return;
     }
@@ -581,7 +590,7 @@ const Dashboard: React.FC = () => {
       setReservations(prev =>
         prev.map(res => {
           const currentId = res._id || res.id;
-          return currentId === reservationId 
+          return currentId === reservationId
             ? { ...res, status: newStatus }
             : res;
         })
@@ -592,17 +601,17 @@ const Dashboard: React.FC = () => {
 
       // Make the API call
       const updatedReservation = await reservationsService.updateReservationStatus(reservationId, newStatus);
-      
+
       if (updatedReservation) {
         console.log('Dashboard: Status update successful, fetching fresh data');
         // Fetch fresh data to ensure everything is in sync
         await fetchReservations();
-        
-        toast({ 
-          title: "Status Updated", 
-          description: `Reservation has been marked as ${newStatus}` 
+
+        toast({
+          title: "Status Updated",
+          description: `Reservation has been marked as ${newStatus}`
         });
-        
+
         // Force another state update to ensure calendar refreshes
         setLastUpdate(Date.now());
       } else {
@@ -615,14 +624,14 @@ const Dashboard: React.FC = () => {
         reservationId,
         newStatus
       });
-      
+
       // Revert the optimistic update
       await fetchReservations();
-      
-      toast({ 
-        title: "Error", 
-        description: errorMessage, 
-        variant: "destructive" 
+
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive"
       });
     }
   };
@@ -669,8 +678,8 @@ const Dashboard: React.FC = () => {
     totalRevenue: reservations
       .filter(r => r.status === 'completed')
       .reduce((sum, r) => sum + (r.totalPrice || 0), 0),
-    usageRate: reservations.length > 0 
-      ? (reservations.filter(r => ['completed', 'confirmed'].includes(r.status)).length / reservations.length) * 100 
+    usageRate: reservations.length > 0
+      ? (reservations.filter(r => ['completed', 'confirmed'].includes(r.status)).length / reservations.length) * 100
       : 0
   }), [reservations]);
 
@@ -679,7 +688,7 @@ const Dashboard: React.FC = () => {
   const itemsPerPage = 10;
 
   // Get active reservations (not completed or cancelled) for display
-  const activeReservations = React.useMemo(() => 
+  const activeReservations = React.useMemo(() =>
     reservations
       .filter(r => !['completed', 'cancelled'].includes(r.status))
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
@@ -712,11 +721,11 @@ const Dashboard: React.FC = () => {
   const handleSaveService = async (serviceData: Partial<CreateServiceData & UpdateServiceData>) => {
     try {
       console.log('Dashboard: Saving service:', { selectedService, serviceData });
-      
+
       if (selectedService) {
         // For updates, we can include all fields
         await servicesApi.updateService(selectedService.id, serviceData);
-        toast({ title: "Success", description: "Service updated successfully" });
+        toast({ title: t('common.success'), description: t('success.serviceUpdated') });
       } else {
         // For creation, only send the fields that the backend expects
         const createData: CreateServiceData = {
@@ -725,47 +734,47 @@ const Dashboard: React.FC = () => {
           price: serviceData.price!
         };
         await servicesApi.createService(createData);
-        toast({ title: "Success", description: "Service created successfully" });
+        toast({ title: t('common.success'), description: t('success.serviceCreated') });
       }
-      
+
       // Refresh services list and close modal
       await fetchServices();
       closeModal();
     } catch (error: any) {
       console.error('Dashboard: Service save error:', error);
-      
+
       // Show specific error message from API
       const errorMessage = error.message || 'Failed to save service';
-      toast({ 
-        title: "Error", 
-        description: errorMessage, 
-        variant: "destructive" 
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive"
       });
     }
   };
 
   const handleDeleteService = async (serviceId: string) => {
     if (!serviceId) return;
-    
+
     // Add confirmation dialog
-    if (!window.confirm('Are you sure you want to delete this service? This action cannot be undone.')) {
+    if (!window.confirm(t('common.delete') + '?')) {
       return;
     }
-    
+
     try {
       console.log('Dashboard: Deleting service:', serviceId);
       await servicesApi.deleteService(serviceId);
       await fetchServices(); // Refresh the list
-      toast({ title: "Deleted", description: "Service deleted successfully" });
+      toast({ title: t('common.success'), description: t('success.serviceDeleted') });
     } catch (error: any) {
       console.error('Dashboard: Service delete error:', error);
-      
+
       // Show specific error message
       const errorMessage = error.message || 'Failed to delete service';
-      toast({ 
-        title: "Error", 
-        description: errorMessage, 
-        variant: "destructive" 
+      toast({
+        title: "Error",
+        description: errorMessage,
+        variant: "destructive"
       });
     }
   };
@@ -775,10 +784,10 @@ const Dashboard: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center">
         <Card className="max-w-md mx-auto">
           <CardHeader>
-            <CardTitle>Access Denied</CardTitle>
+            <CardTitle>{t('auth.accessDenied')}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground">You don't have permission to access the dashboard.</p>
+            <p className="text-muted-foreground">{t('auth.noPermission')}</p>
           </CardContent>
         </Card>
       </div>
@@ -789,50 +798,50 @@ const Dashboard: React.FC = () => {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">{user.role === 'admin' ? 'Admin Dashboard' : 'Barber Dashboard'}</h1>
-          <p className="text-muted-foreground">Welcome back, {user.name}</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">{user.role === 'admin' ? t('dashboard.adminDashboard') : t('dashboard.barberDashboard')}</h1>
+          <p className="text-muted-foreground">{t('dashboard.welcomeBack')}, {user.name}</p>
         </div>
 
         {/* Statistics Cards - Mobile Responsive */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           <Card className="mobile-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Total Bookings</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">{t('dashboard.stats.totalBookings')}</CardTitle>
               <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-lg sm:text-2xl font-bold">{stats.total}</div>
-              <p className="text-xs text-muted-foreground">All time bookings</p>
+              <p className="text-xs text-muted-foreground">{t('dashboard.stats.allTimeBookings')}</p>
             </CardContent>
           </Card>
           <Card className="mobile-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Pending</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">{t('dashboard.stats.pending')}</CardTitle>
               <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4 text-warning" />
             </CardHeader>
             <CardContent>
               <div className="text-lg sm:text-2xl font-bold text-warning">{stats.pending}</div>
-              <p className="text-xs text-muted-foreground">Awaiting confirmation</p>
+              <p className="text-xs text-muted-foreground">{t('dashboard.stats.awaitingConfirmation')}</p>
             </CardContent>
           </Card>
           <Card className="mobile-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Confirmed</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">{t('dashboard.stats.confirmed')}</CardTitle>
               <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-success" />
             </CardHeader>
             <CardContent>
               <div className="text-lg sm:text-2xl font-bold text-success">{stats.confirmed}</div>
-              <p className="text-xs text-muted-foreground">Ready to serve</p>
+              <p className="text-xs text-muted-foreground">{t('dashboard.stats.readyToServe')}</p>
             </CardContent>
           </Card>
           <Card className="mobile-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Completed</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">{t('dashboard.stats.completed')}</CardTitle>
               <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
             </CardHeader>
             <CardContent>
               <div className="text-lg sm:text-2xl font-bold">{stats.completed}</div>
-              <p className="text-xs text-muted-foreground">Successfully served</p>
+              <p className="text-xs text-muted-foreground">{t('dashboard.stats.successfullyServed')}</p>
             </CardContent>
           </Card>
         </div>
@@ -840,41 +849,41 @@ const Dashboard: React.FC = () => {
         {/* Tabs - Mobile Responsive */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-4 h-10 sm:h-11">
-            <TabsTrigger value="reservations" className="text-xs sm:text-sm px-2 sm:px-4">Active</TabsTrigger>
-            <TabsTrigger value="history" className="text-xs sm:text-sm px-2 sm:px-4">History</TabsTrigger>
-            <TabsTrigger value="calendar" className="text-xs sm:text-sm px-2 sm:px-4">Calendar</TabsTrigger>
-            <TabsTrigger value="services" className="text-xs sm:text-sm px-2 sm:px-4">Services</TabsTrigger>
+            <TabsTrigger value="reservations" className="text-xs sm:text-sm px-2 sm:px-4">{t('dashboard.tabs.reservations')}</TabsTrigger>
+            <TabsTrigger value="history" className="text-xs sm:text-sm px-2 sm:px-4">{t('dashboard.tabs.history')}</TabsTrigger>
+            <TabsTrigger value="calendar" className="text-xs sm:text-sm px-2 sm:px-4">{t('dashboard.tabs.calendar')}</TabsTrigger>
+            <TabsTrigger value="services" className="text-xs sm:text-sm px-2 sm:px-4">{t('dashboard.tabs.services')}</TabsTrigger>
           </TabsList>
 
           {/* Services Tab */}
           <TabsContent value="services">
             <div className="flex justify-end mb-4">
-              <Button onClick={openCreateModal}>Add Service</Button>
+              <Button onClick={openCreateModal}>{t('dashboard.services.addService')}</Button>
             </div>
             {serviceLoading ? (
-              <p>Loading services...</p>
+              <p>{t('dashboard.services.loadingServices')}</p>
             ) : services.length === 0 ? (
-              <p>No services found</p>
+              <p>{t('dashboard.services.noServices')}</p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Duration</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead>{t('dashboard.services.name')}</TableHead>
+                    <TableHead>{t('dashboard.services.duration')}</TableHead>
+                    <TableHead>{t('dashboard.services.price')}</TableHead>
+                    <TableHead>{t('dashboard.reservations.actions')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {services.map((service, index) => (
                     <TableRow key={`service-${service.id}-${index}`}>
                       <TableCell>{service.name}</TableCell>
-                      <TableCell>{service.duration} mins</TableCell>
+                      <TableCell>{service.duration} {t('dashboard.services.minutes')}</TableCell>
                       <TableCell>${service.price}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
-                          <Button size="sm" onClick={() => openEditModal(service)}>Edit</Button>
-                          <Button size="sm" variant="destructive" onClick={() => handleDeleteService(service.id)}>Delete</Button>
+                          <Button size="sm" onClick={() => openEditModal(service)}>{t('common.edit')}</Button>
+                          <Button size="sm" variant="destructive" onClick={() => handleDeleteService(service.id)}>{t('common.delete')}</Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -886,7 +895,7 @@ const Dashboard: React.FC = () => {
 
           {/* History Tab */}
           <TabsContent value="history">
-            <ReservationHistory 
+            <ReservationHistory
               reservations={reservations}
               isLoading={isLoading}
               onStatusUpdate={handleStatusUpdate}
@@ -907,11 +916,11 @@ const Dashboard: React.FC = () => {
                     Showing active reservations ({activeReservations.length} total)
                   </div>
                   <div className="text-sm font-medium">
-                    Usage Rate: {stats.usageRate.toFixed(1)}% | 
+                    Usage Rate: {stats.usageRate.toFixed(1)}% |
                     Revenue: ${stats.totalRevenue.toFixed(2)}
                   </div>
                 </div>
-                
+
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -926,98 +935,98 @@ const Dashboard: React.FC = () => {
                   </TableHeader>
                   <TableBody>
                     {paginatedReservations
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                    .filter(reservation => {
-                      const hasId = reservation._id || reservation.id;
-                      if (!hasId) {
-                        console.error('Reservation without ID:', JSON.stringify(reservation, null, 2));
-                        return false;
-                      }
-                      return true;
-                    })
-                    .map((reservation, index) => {
-                      const reservationId = reservation._id || reservation.id;
-                      return (
-                        <TableRow key={`reservation-${reservationId}-${index}`}>
-                          <TableCell>
-                            <div className="flex items-center">
-                              <Calendar className="w-4 h-4 mr-2" />
-                              {format(new Date(reservation.date), 'PPP')}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center">
-                              <Clock className="w-4 h-4 mr-2" />
-                              {reservation.startTime}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center">
-                              <User className="w-4 h-4 mr-2" />
-                              {reservation.clientName}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center">
-                              <Phone className="w-4 h-4 mr-2" />
-                              {reservation.clientPhone || 'N/A'}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center">
-                              <Scissors className="w-4 h-4 mr-2" />
-                              {reservation.services && reservation.services.length > 0
-                                ? reservation.services.map(s => s.serviceName).join(', ')
-                                : 'No service specified'}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={getStatusBadgeVariant(reservation.status)} className="flex w-fit items-center gap-1">
-                              {getStatusIcon(reservation.status)}
-                              {reservation.status.charAt(0).toUpperCase() + reservation.status.slice(1)}
-                            </Badge>
-                          </TableCell>
-                          {user?.role === 'admin' && (
+                      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                      .filter(reservation => {
+                        const hasId = reservation._id || reservation.id;
+                        if (!hasId) {
+                          console.error('Reservation without ID:', JSON.stringify(reservation, null, 2));
+                          return false;
+                        }
+                        return true;
+                      })
+                      .map((reservation, index) => {
+                        const reservationId = reservation._id || reservation.id;
+                        return (
+                          <TableRow key={`reservation-${reservationId}-${index}`}>
                             <TableCell>
-                              <div className="flex items-center gap-2">
-                                {reservation.status === 'pending' && (
-                                  <>
+                              <div className="flex items-center">
+                                <Calendar className="w-4 h-4 mr-2" />
+                                {format(new Date(reservation.date), 'PPP')}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center">
+                                <Clock className="w-4 h-4 mr-2" />
+                                {reservation.startTime}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center">
+                                <User className="w-4 h-4 mr-2" />
+                                {reservation.clientName}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center">
+                                <Phone className="w-4 h-4 mr-2" />
+                                {reservation.clientPhone || 'N/A'}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center">
+                                <Scissors className="w-4 h-4 mr-2" />
+                                {reservation.services && reservation.services.length > 0
+                                  ? reservation.services.map(s => s.serviceName).join(', ')
+                                  : 'No service specified'}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={getStatusBadgeVariant(reservation.status)} className="flex w-fit items-center gap-1">
+                                {getStatusIcon(reservation.status)}
+                                {reservation.status.charAt(0).toUpperCase() + reservation.status.slice(1)}
+                              </Badge>
+                            </TableCell>
+                            {user?.role === 'admin' && (
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  {reservation.status === 'pending' && (
+                                    <>
+                                      <Button
+                                        size="sm"
+                                        variant="default"
+                                        onClick={() => handleStatusUpdate(reservationId, 'confirmed')}
+                                      >
+                                        <CheckCircle className="w-4 h-4 mr-1" />
+                                        Confirm
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="destructive"
+                                        onClick={() => handleStatusUpdate(reservationId, 'cancelled')}
+                                      >
+                                        <XCircle className="w-4 h-4 mr-1" />
+                                        Cancel
+                                      </Button>
+                                    </>
+                                  )}
+                                  {reservation.status === 'confirmed' && (
                                     <Button
                                       size="sm"
                                       variant="default"
-                                      onClick={() => handleStatusUpdate(reservationId, 'confirmed')}
+                                      onClick={() => handleStatusUpdate(reservationId, 'completed')}
                                     >
                                       <CheckCircle className="w-4 h-4 mr-1" />
-                                      Confirm
+                                      Complete
                                     </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="destructive"
-                                      onClick={() => handleStatusUpdate(reservationId, 'cancelled')}
-                                    >
-                                      <XCircle className="w-4 h-4 mr-1" />
-                                      Cancel
-                                    </Button>
-                                  </>
-                                )}
-                                {reservation.status === 'confirmed' && (
-                                  <Button
-                                    size="sm"
-                                    variant="default"
-                                    onClick={() => handleStatusUpdate(reservationId, 'completed')}
-                                  >
-                                    <CheckCircle className="w-4 h-4 mr-1" />
-                                    Complete
-                                  </Button>
-                                )}
-                              </div>
-                            </TableCell>
-                          )}
-                        </TableRow>
-                      );
-                    })}
-                </TableBody>
-              </Table>
+                                  )}
+                                </div>
+                              </TableCell>
+                            )}
+                          </TableRow>
+                        );
+                      })}
+                  </TableBody>
+                </Table>
               </div>
             )}
           </TabsContent>
@@ -1027,8 +1036,8 @@ const Dashboard: React.FC = () => {
             <div className="mb-4 p-4 bg-muted/50 rounded-lg">
               <h3 className="font-medium mb-2">Calendar Debug Info:</h3>
               <p className="text-sm text-muted-foreground">
-                Total Reservations: {reservations.length} | 
-                Calendar Slots: {calendarSlots.length} | 
+                Total Reservations: {reservations.length} |
+                Calendar Slots: {calendarSlots.length} |
                 Last Update: {new Date(lastUpdate).toLocaleTimeString()}
               </p>
               <div className="mt-2">
@@ -1040,22 +1049,22 @@ const Dashboard: React.FC = () => {
                 ))}
               </div>
             </div>
-            <WeeklyCalendar 
-              key={`calendar-${lastUpdate}-${JSON.stringify(reservations.map(r => ({id: r._id || r.id, status: r.status})))}`}
+            <WeeklyCalendar
+              key={`calendar-${lastUpdate}-${JSON.stringify(reservations.map(r => ({ id: r._id || r.id, status: r.status })))}`}
               timeSlots={calendarSlots}
               barbers={barbers}
-              onSlotClick={() => {}}
+              onSlotClick={() => { }}
               isLoading={isLoading}
             />
           </TabsContent>
         </Tabs>
 
         {/* Service Modal */}
-        <ServiceModal 
-          open={modalOpen} 
-          onClose={closeModal} 
-          service={selectedService} 
-          onSave={handleSaveService} 
+        <ServiceModal
+          open={modalOpen}
+          onClose={closeModal}
+          service={selectedService}
+          onSave={handleSaveService}
         />
       </div>
     </div>

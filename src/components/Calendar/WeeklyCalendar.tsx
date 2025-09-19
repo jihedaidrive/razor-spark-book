@@ -6,6 +6,7 @@ import { UiTimeSlot, UiBarber } from '@/types';
 import { ChevronLeft, ChevronRight, Clock, User } from 'lucide-react';
 import { format, startOfWeek, addDays, isSameDay, addWeeks, subWeeks, isToday, isPast, isFuture, parseISO, set } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { useTranslation } from 'react-i18next';
 
 interface WeeklyCalendarProps {
   timeSlots: UiTimeSlot[];
@@ -29,6 +30,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
   isLoading = false,
   busySlots = [],
 }) => {
+  const { t } = useTranslation();
   const now = new Date();
   const [currentWeek, setCurrentWeek] = useState(new Date());
   
@@ -144,7 +146,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Loading Calendar...</CardTitle>
+          <CardTitle>{t('dashboard.calendar.loading')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="animate-pulse space-y-4">
@@ -163,8 +165,8 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between space-y-3 sm:space-y-0">
           <CardTitle className="flex items-center space-x-2 text-lg">
             <Clock className="w-5 h-5" />
-            <span className="hidden sm:inline">Weekly Schedule</span>
-            <span className="sm:hidden">Schedule</span>
+            <span className="hidden sm:inline">{t('dashboard.calendar.weeklyView')}</span>
+            <span className="sm:hidden">{t('dashboard.calendar.weeklyView')}</span>
           </CardTitle>
           <div className="flex items-center justify-between sm:justify-end space-x-2">
             <Button
@@ -174,7 +176,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
               className="h-9 px-3"
             >
               <ChevronLeft className="w-4 h-4" />
-              <span className="hidden sm:inline ml-1">Prev</span>
+              <span className="hidden sm:inline ml-1">{t('dashboard.calendar.previousWeek')}</span>
             </Button>
             <span className="text-xs sm:text-sm font-medium px-2 sm:px-4 text-center">
               <div className="sm:hidden">{format(weekStart, 'MMM d')} - {format(addDays(weekStart, 5), 'MMM d')}</div>
@@ -186,7 +188,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
               onClick={() => navigateWeek('next')}
               className="h-9 px-3"
             >
-              <span className="hidden sm:inline mr-1">Next</span>
+              <span className="hidden sm:inline mr-1">{t('dashboard.calendar.nextWeek')}</span>
               <ChevronRight className="w-4 h-4" />
             </Button>
           </div>
@@ -199,7 +201,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
             {/* Header with days - Mobile optimized */}
             <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-3 sm:mb-4">
               <div className="font-medium text-xs sm:text-sm text-muted-foreground p-1 sm:p-2 text-center">
-                <span className="hidden sm:inline">Time</span>
+                <span className="hidden sm:inline">{t('dashboard.calendar.timeSlot')}</span>
                 <span className="sm:hidden">T</span>
               </div>
               {workingDays.map(day => (
@@ -238,7 +240,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
                         const slot = getSlotForDateTime(barber.id, day, hour);
                         
                         let buttonVariant: "link" | "default" | "destructive" | "outline" | "secondary" | "ghost" = "outline";
-                        let buttonText = "Available";
+                        let buttonText = t('dashboard.calendar.available');
                         let isDisabled = false;
                         let buttonClass = "border-success text-success hover:bg-success hover:text-success-foreground";
 
@@ -253,38 +255,38 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
                         switch (slot.status) {
                           case 'confirmed':
                             buttonVariant = "destructive";
-                            buttonText = "Confirmed";
+                            buttonText = t('dashboard.reservations.status_confirmed');
                             isDisabled = true;
                             buttonClass = "bg-destructive/10 text-destructive hover:bg-destructive/20 cursor-not-allowed";
                             break;
                           case 'completed':
                             buttonVariant = "ghost";
-                            buttonText = "Completed";
+                            buttonText = t('dashboard.reservations.status_completed');
                             isDisabled = true;
                             buttonClass = "opacity-70 cursor-not-allowed text-muted-foreground";
                             break;
                           case 'pending':
                             buttonVariant = "secondary";
-                            buttonText = "Pending";
+                            buttonText = t('dashboard.reservations.status_pending');
                             isDisabled = true;
                             buttonClass = "text-warning border-warning cursor-not-allowed";
                             break;
                           case 'cancelled':
                             // Show cancelled slots as available
                             buttonVariant = "outline";
-                            buttonText = "Available";
+                            buttonText = t('dashboard.calendar.available');
                             buttonClass = "border-success text-success hover:bg-success/10";
                             isDisabled = false;
                             break;
                           case 'past':
                             buttonVariant = "ghost";
-                            buttonText = "Past";
+                            buttonText = t('dashboard.calendar.past');
                             isDisabled = true;
                             buttonClass = "opacity-30 cursor-not-allowed text-muted-foreground";
                             break;
                           case 'available':
                             buttonVariant = "outline";
-                            buttonText = "Available";
+                            buttonText = t('dashboard.calendar.available');
                             buttonClass = "border-success text-success hover:bg-success/10";
                             isDisabled = false;
                             break;
@@ -292,7 +294,7 @@ const WeeklyCalendar: React.FC<WeeklyCalendarProps> = ({
                             // For any unknown status, check isAvailable flag
                             if (!slot.isAvailable) {
                               buttonVariant = "destructive";
-                              buttonText = "Reserved";
+                              buttonText = t('dashboard.calendar.booked');
                               isDisabled = true;
                               buttonClass = "bg-destructive/10 text-destructive hover:bg-destructive/20 cursor-not-allowed";
                             }

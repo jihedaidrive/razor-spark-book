@@ -254,7 +254,7 @@ export default function BookingModal({
                           {service.duration} min
                         </span>
                         <span className="text-base sm:text-lg font-bold text-primary">
-                          ${service.price}
+                          dt{service.price}
                         </span>
                       </div>
                     </div>

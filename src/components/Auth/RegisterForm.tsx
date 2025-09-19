@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, Phone, Lock, User } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const RegisterForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -18,12 +19,13 @@ const RegisterForm: React.FC = () => {
   const [phoneError, setPhoneError] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   // PHONE VALIDATION: Must be exactly 8 digits
   const validatePhone = (phoneNumber: string): boolean => {
     const cleanPhone = phoneNumber.replace(/\D/g, ''); // Remove non-digits
     if (cleanPhone.length !== 8) {
-      setPhoneError('Phone number must be exactly 8 digits');
+      setPhoneError(t('validation.phoneInvalid'));
       return false;
     }
     setPhoneError('');
@@ -93,7 +95,7 @@ const RegisterForm: React.FC = () => {
           <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-primary-foreground font-bold text-2xl">B</span>
           </div>
-          <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
+          <CardTitle className="text-2xl font-bold">{t('auth.register')}</CardTitle>
           <CardDescription>
             Join us and book your perfect cut today
           </CardDescription>
@@ -102,14 +104,14 @@ const RegisterForm: React.FC = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name">{t('forms.name')}</Label>
               <div className="relative">
                 <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="name"
                   name="name"
                   type="text"
-                  placeholder="Enter your full name"
+                  placeholder={t('forms.namePlaceholder')}
                   value={formData.name}
                   onChange={handleChange}
                   className="pl-10"
@@ -119,14 +121,14 @@ const RegisterForm: React.FC = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone">{t('forms.phone')}</Label>
               <div className="relative">
                 <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="phone"
                   name="phone"
                   type="tel"
-                  placeholder="12345678"
+                  placeholder={t('forms.phonePlaceholder')}
                   value={formData.phone}
                   onChange={handleChange}
                   className={`pl-10 ${phoneError ? 'border-destructive' : ''}`}
@@ -137,18 +139,18 @@ const RegisterForm: React.FC = () => {
               {phoneError && (
                 <p className="text-sm text-destructive">{phoneError}</p>
               )}
-              <p className="text-xs text-muted-foreground">Enter exactly 8 digits</p>
+              <p className="text-xs text-muted-foreground">{t('forms.phonePlaceholder')}</p>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t('forms.password')}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   name="password"
                   type="password"
-                  placeholder="Create a password"
+                  placeholder={t('forms.passwordPlaceholder')}
                   value={formData.password}
                   onChange={handleChange}
                   className="pl-10"
@@ -158,14 +160,14 @@ const RegisterForm: React.FC = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">{t('forms.confirmPassword')}</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="confirmPassword"
                   name="confirmPassword"
                   type="password"
-                  placeholder="Confirm your password"
+                  placeholder={t('forms.confirmPasswordPlaceholder')}
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   className="pl-10"
@@ -173,7 +175,7 @@ const RegisterForm: React.FC = () => {
                 />
               </div>
               {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                <p className="text-sm text-destructive">Passwords do not match</p>
+                <p className="text-sm text-destructive">{t('validation.passwordsDoNotMatch')}</p>
               )}
             </div>
             
@@ -183,7 +185,7 @@ const RegisterForm: React.FC = () => {
               disabled={isLoading || !isFormValid}
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Account
+              {t('forms.registerButton')}
             </Button>
           </form>
           
@@ -193,7 +195,7 @@ const RegisterForm: React.FC = () => {
               to="/login"
               className="text-primary hover:text-primary/80 font-medium"
             >
-              Sign in
+              {t('auth.login')}
             </Link>
           </div>
         </CardContent>

@@ -58,7 +58,7 @@ const Landing: React.FC = () => {
           className="absolute inset-0 w-full h-full object-cover brightness-50"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-primary/30 to-black/80" />
-        
+
         {/* Mobile-first Hero Content */}
         <div className="relative z-10 px-6 py-16 text-center text-white max-w-sm sm:max-w-2xl mx-auto">
           <h1 className="text-3xl sm:text-5xl md:text-7xl font-extrabold mb-4 sm:mb-6 tracking-tight leading-tight">
@@ -67,7 +67,7 @@ const Landing: React.FC = () => {
           <p className="text-base sm:text-lg md:text-2xl mb-6 sm:mb-8 text-white/90 leading-relaxed">
             {t('landing.hero.subtitle')}
           </p>
-          
+
           {/* Mobile-optimized CTA Buttons */}
           <div className="space-y-3 sm:space-y-0 sm:flex sm:justify-center sm:gap-4 mb-8 sm:mb-12">
             <Button size="lg" variant="secondary" className="mobile-btn w-full sm:w-auto" asChild>
@@ -90,21 +90,21 @@ const Landing: React.FC = () => {
               <CardContent className="p-4 text-center">
                 <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-secondary mx-auto mb-2 sm:mb-4" />
                 <h3 className="font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Hours</h3>
-                <p className="text-xs sm:text-sm opacity-90">Mon-Sat: 9am-6pm</p>
+                <p className="text-xs sm:text-sm text-white">lun-dim: 12am-00pm</p>
               </CardContent>
             </Card>
             <Card className="backdrop-blur-sm bg-white/10 border-white/20">
               <CardContent className="p-4 text-center">
                 <Phone className="w-6 h-6 sm:w-8 sm:h-8 text-secondary mx-auto mb-2 sm:mb-4" />
-                <h3 className="font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Call</h3>
-                <p className="text-xs sm:text-sm opacity-90">(123) 456-7890</p>
+                <h3 className="font-semibold mb-1 sm:mb-2 text-sm sm:text-base">telephone</h3>
+                <p className="text-xs sm:text-sm text-white">23 064 722</p>
               </CardContent>
             </Card>
             <Card className="backdrop-blur-sm bg-white/10 border-white/20 sm:col-span-1 col-span-1">
               <CardContent className="p-4 text-center">
                 <MapPin className="w-6 h-6 sm:w-8 sm:h-8 text-secondary mx-auto mb-2 sm:mb-4" />
                 <h3 className="font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Visit</h3>
-                <p className="text-xs sm:text-sm opacity-90">123 Style Street</p>
+                <p className="text-xs sm:text-sm text-white">Raouebi benzart</p>
               </CardContent>
             </Card>
           </div>
@@ -120,7 +120,7 @@ const Landing: React.FC = () => {
               A Legacy of <span className="text-primary">Excellence</span>
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg mb-6 sm:mb-8 leading-relaxed">
-              Since 2020, Razor Spark has been defining men's grooming excellence. 
+              Since 2020, Razor Spark has been defining men's grooming excellence.
               Our master barbers combine traditional techniques with modern styles.
             </p>
           </div>
@@ -248,7 +248,7 @@ const Landing: React.FC = () => {
           />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/80 to-secondary/90" />
         </div>
-        
+
         <div className="relative z-10 px-6 text-center">
           <h2 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6 tracking-tight">
             Transform Your Style
@@ -262,9 +262,9 @@ const Landing: React.FC = () => {
                 <Calendar className="w-5 h-5 mr-2" /> Book Your Visit
               </Link>
             </Button>
-            <Button 
-              size="lg" 
-              variant="outline" 
+            <Button
+              size="lg"
+              variant="outline"
               className="mobile-btn w-full sm:w-auto border-2 border-white text-white hover:bg-white hover:text-primary"
             >
               <Phone className="w-5 h-5 mr-2" /> Contact Us

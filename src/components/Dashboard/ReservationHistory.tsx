@@ -211,7 +211,7 @@ const ReservationHistory: React.FC<ReservationHistoryProps> = ({
                             <div className="text-xs text-muted-foreground">Cancelled</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-primary">${historyStats.totalRevenue.toFixed(2)}</div>
+                            <div className="text-2xl font-bold text-primary">dt{historyStats.totalRevenue.toFixed(2)}</div>
                             <div className="text-xs text-muted-foreground">Revenue</div>
                         </div>
                     </div>

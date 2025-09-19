@@ -36,7 +36,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({ service, onBookClick }) => {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         <Badge className="absolute top-4 right-4 bg-secondary text-secondary-foreground">
-          ${service.price}
+          dt{service.price}
         </Badge>
       </div>
 

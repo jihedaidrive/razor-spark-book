@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Calendar, Home, LogOut, Settings, User, History, Menu, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const Navigation: React.FC = () => {
   const { user, logout } = useAuth();
@@ -27,6 +28,7 @@ const Navigation: React.FC = () => {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center space-x-4">
+          <LanguageSwitcher variant="compact" />
           {user ? (
             <>
               <Button
@@ -104,7 +106,8 @@ const Navigation: React.FC = () => {
         </div>
 
         {/* Mobile Menu Button */}
-        <div className="md:hidden">
+        <div className="md:hidden flex items-center space-x-2">
+          <LanguageSwitcher variant="minimal" />
           <Button
             variant="ghost"
             size="sm"
@@ -119,6 +122,12 @@ const Navigation: React.FC = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden bg-background border-b border-border">
           <div className="container mx-auto px-4 py-4 space-y-2">
+            {/* Language Switcher in Mobile Menu */}
+            <div className="pb-2 border-b border-border">
+              <div className="flex items-center justify-center">
+                <LanguageSwitcher variant="compact" />
+              </div>
+            </div>
             {user ? (
               <>
                 <Button

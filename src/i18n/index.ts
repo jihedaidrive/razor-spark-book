@@ -2,6 +2,7 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { frenchTranslations } from './fr';
 import { englishTranslations } from './en';
+import { arabicTranslations } from './ar';
 
 const resources = {
   fr: {
@@ -9,6 +10,9 @@ const resources = {
   },
   en: {
     translation: englishTranslations
+  },
+  ar: {
+    translation: arabicTranslations
   }
 };
 

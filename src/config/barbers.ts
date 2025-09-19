@@ -6,23 +6,12 @@ import { UiBarber } from '@/types';
 
 export const BARBERS: UiBarber[] = [
   {
-    id: 'Adhib',        // Use actual name as ID to match API data
-    name: 'Adhib',
+    id: 'Adib',        // Use actual name as ID to match API data
+    name: 'Adib',
     phone: '123456789',
     isActive: true
   },
-  {
-    id: 'Mike',        // Use actual name as ID to match API data
-    name: 'Mike', 
-    phone: '987654321',
-    isActive: true
-  },
-  {
-    id: 'Alex',        // Use actual name as ID to match API data
-    name: 'Alex',
-    phone: '555555555', 
-    isActive: true
-  }
+
 ];
 
 // Helper function to get barber by name (for API data mapping)
