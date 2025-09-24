@@ -55,19 +55,7 @@ const LoginForm: React.FC = () => {
     setIsLoading(true);
     try {
       await login(phone, password);
-      
-      // Check for return URL from ProtectedRoute or intended service
-      const returnTo = location.state?.from?.pathname + (location.state?.from?.search || '');
-      const intendedService = sessionStorage.getItem('intendedService');
-      
-      if (returnTo && returnTo !== '/') {
-        navigate(returnTo, { replace: true });
-      } else if (intendedService) {
-        sessionStorage.removeItem('intendedService');
-        navigate(`/booking?service=${intendedService}`, { replace: true });
-      } else {
-        navigate('/dashboard', { replace: true });
-      }
+      navigate('/dashboard'); // Navigate to dashboard after successful login
     } catch (error) {
       // Error is handled by the auth context
     } finally {

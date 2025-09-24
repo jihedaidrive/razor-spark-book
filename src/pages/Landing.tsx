@@ -38,23 +38,10 @@ const Landing: React.FC = () => {
   }, []);
 
   const handleBookService = (service: Service) => {
-    try {
-      if (user) {
-        navigate(`/booking?service=${service.id}`);
-      } else {
-        // Store the intended service in sessionStorage for after login
-        sessionStorage.setItem('intendedService', service.id);
-        navigate('/register', { 
-          state: { 
-            returnTo: `/booking?service=${service.id}`,
-            serviceName: service.name 
-          } 
-        });
-      }
-    } catch (error) {
-      console.error('Navigation error:', error);
-      // Fallback to direct URL navigation if React Router fails
-      window.location.href = user ? `/booking?service=${service.id}` : '/register';
+    if (user) {
+      navigate(`/booking?service=${service.id}`);
+    } else {
+      navigate('/register');
     }
   };
 

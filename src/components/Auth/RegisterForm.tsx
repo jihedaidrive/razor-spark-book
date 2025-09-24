@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,7 +19,6 @@ const RegisterForm: React.FC = () => {
   const [phoneError, setPhoneError] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const { t } = useTranslation();
 
   // PHONE VALIDATION: Must be exactly 8 digits
@@ -73,19 +72,7 @@ const RegisterForm: React.FC = () => {
     setIsLoading(true);
     try {
       await register(formData.phone, formData.password, formData.name);
-
-      // Check for return URL or intended service
-      const returnTo = location.state?.returnTo;
-      const intendedService = sessionStorage.getItem('intendedService');
-
-      if (returnTo) {
-        navigate(returnTo, { replace: true });
-      } else if (intendedService) {
-        sessionStorage.removeItem('intendedService');
-        navigate(`/booking?service=${intendedService}`, { replace: true });
-      } else {
-        navigate('/dashboard', { replace: true });
-      }
+      navigate('/dashboard'); // Navigate to dashboard after successful registration
     } catch (error) {
       // Error is handled by the auth context
     } finally {
