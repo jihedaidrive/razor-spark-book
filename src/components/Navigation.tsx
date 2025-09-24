@@ -19,11 +19,23 @@ const Navigation: React.FC = () => {
   return (
     <nav className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-lg">B</span>
+        <Link to="/" className="flex items-center space-x-3 group">
+          <div className="relative">
+            <img 
+              src="/Luxury Brand Logo ADIB - Chic Monogram.png" 
+              alt="ADIB Barber Shop Logo" 
+              className="h-12 w-auto object-contain filter brightness-110 contrast-110 transition-all duration-300 group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
           </div>
-          <span className="font-bold text-xl text-foreground">BarberShop</span>
+          <div className="hidden sm:block">
+            <span className="font-bold text-xl bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+              ADIB
+            </span>
+            <div className="text-xs text-muted-foreground font-medium tracking-wider">
+              PREMIUM GROOMING
+            </div>
+          </div>
         </Link>
 
         {/* Desktop Navigation */}

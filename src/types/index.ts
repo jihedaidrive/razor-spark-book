@@ -94,3 +94,29 @@ export interface Reservation {
   totalDuration?: number;
   totalPrice?: number;
 }
+
+// Review types
+export interface Review {
+  id: string;
+  clientName: string;
+  rating: number; // 1-5 stars
+  comment: string;
+  date: string;
+  serviceId?: string;
+  serviceName?: string;
+  barberId?: string;
+  barberName?: string;
+  isVerified?: boolean;
+}
+
+export interface ReviewStats {
+  averageRating: number;
+  totalReviews: number;
+  ratingDistribution: {
+    5: number;
+    4: number;
+    3: number;
+    2: number;
+    1: number;
+  };
+}

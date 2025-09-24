@@ -14,6 +14,7 @@ import haircutImage from '@/assets/haircut-service.jpg';
 import beardImage from '@/assets/beard-service.jpg';
 import treatmentImage from '@/assets/treatment-service.jpg';
 import { servicesApi } from '@/api/servicesApi';
+import ReviewsSection from '@/components/ReviewsSection';
 
 const Landing: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);
@@ -39,13 +40,7 @@ const Landing: React.FC = () => {
     window.location.href = `/booking?service=${service.id}`;
   };
 
-  // Stats data with unique keys
-  const statsData = [
-    { icon: Scissors, count: '500+', label: 'Happy Clients', color: 'primary' },
-    { icon: Star, count: '4.9', label: 'Rating', color: 'secondary' },
-    { icon: Users, count: '5', label: 'Expert Barbers', color: 'primary' },
-    { icon: Calendar, count: '3', label: 'Years Experience', color: 'secondary' },
-  ];
+
 
   return (
     <MobileLayout showBottomPadding={!!user}>
@@ -61,6 +56,34 @@ const Landing: React.FC = () => {
 
         {/* Mobile-first Hero Content */}
         <div className="relative z-10 px-6 py-16 text-center text-white max-w-sm sm:max-w-2xl mx-auto">
+          {/* Logo */}
+          <div className="mb-8 sm:mb-12">
+            <div className="relative inline-block">
+              {/* Logo background glow */}
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/30 to-secondary/30 rounded-full blur-xl scale-150 opacity-60"></div>
+
+              {/* Logo container */}
+              <div className="relative bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/20 shadow-2xl">
+                <img
+                  src="/Luxury Brand Logo ADIB - Chic Monogram.png"
+                  alt="ADIB Logo"
+                  className="h-20 sm:h-24 md:h-32 w-auto mx-auto filter brightness-110 contrast-110"
+                />
+              </div>
+            </div>
+
+            {/* Brand name and tagline */}
+            <div className="mt-6 sm:mt-8">
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-wider mb-2">
+                <span className="bg-gradient-to-r from-white via-secondary to-primary bg-clip-text text-transparent">
+                </span>
+              </div>
+              <div className="text-sm sm:text-base md:text-lg font-medium tracking-widest text-white/80 uppercase">
+              </div>
+              <div className="w-24 h-0.5 bg-gradient-to-r from-primary to-secondary mx-auto mt-3 rounded-full"></div>
+            </div>
+          </div>
+
           <h1 className="text-3xl sm:text-5xl md:text-7xl font-extrabold mb-4 sm:mb-6 tracking-tight leading-tight">
             {t('landing.hero.title')}
           </h1>
@@ -120,7 +143,7 @@ const Landing: React.FC = () => {
               A Legacy of <span className="text-primary">Excellence</span>
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg mb-6 sm:mb-8 leading-relaxed">
-              Since 2020, Razor Spark has been defining men's grooming excellence.
+              Since 2020, ADIB has been defining men's grooming excellence.
               Our master barbers combine traditional techniques with modern styles.
             </p>
           </div>
@@ -238,6 +261,9 @@ const Landing: React.FC = () => {
         </div>
       </section>
 
+      {/* Reviews Section */}
+      <ReviewsSection />
+
       {/* Mobile-First CTA Section */}
       <section className="relative py-16 sm:py-32 text-white overflow-hidden -mx-4">
         <div className="absolute inset-0">
@@ -277,13 +303,13 @@ const Landing: React.FC = () => {
           <div className="px-4">
             <div className="flex flex-col sm:flex-row sm:justify-center items-center gap-2 sm:gap-8 text-xs sm:text-sm text-white/80">
               <div className="flex items-center">
-                <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Mon-Sat: 9am-6pm
+                <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> lundi-dimanche 12am-00pm
               </div>
               <div className="flex items-center">
-                <Phone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> (123) 456-7890
+                <Phone className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> 23 064 722
               </div>
               <div className="flex items-center">
-                <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> 123 Style Street
+                <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" /> Raouebi Benzart
               </div>
             </div>
           </div>

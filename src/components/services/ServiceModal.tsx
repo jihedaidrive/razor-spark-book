@@ -80,7 +80,7 @@ const ServiceModal: React.FC<ServiceModalProps> = ({ open, onClose, service, onS
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium">Price ($)</label>
+          <label className="block text-sm font-medium">Price (dt)</label>
           <Input
             type="number"
             min="0"

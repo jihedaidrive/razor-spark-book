@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { useTranslation } from 'react-i18next';
 // Import centralized barber configuration for consistency
 import { BARBERS } from '@/config/barbers';
+import ReviewsAdmin from '@/components/ReviewsAdmin';
 
 // Reservation History Component
 interface ReservationHistoryProps {
@@ -232,7 +233,7 @@ const ReservationHistory: React.FC<ReservationHistoryProps> = ({
               <div className="text-xs text-muted-foreground">{t('dashboard.reservations.status_cancelled')}</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-primary">${historyStats.totalRevenue.toFixed(2)}</div>
+              <div className="text-2xl font-bold text-primary">{historyStats.totalRevenue.toFixed(2)}dt</div>
               <div className="text-xs text-muted-foreground">{t('dashboard.history.stats.totalRevenue')}</div>
             </div>
           </div>
@@ -347,7 +348,7 @@ const ReservationHistory: React.FC<ReservationHistoryProps> = ({
                                   <div key={idx} className="text-sm">
                                     <span className="font-medium">{service.serviceName}</span>
                                     <span className="text-muted-foreground ml-2">
-                                      ({service.duration}min, ${service.price})
+                                      ({service.duration}min, dt{service.price})
                                     </span>
                                   </div>
                                 ))
@@ -364,7 +365,7 @@ const ReservationHistory: React.FC<ReservationHistoryProps> = ({
                           </TableCell>
                           <TableCell>
                             <div className="font-medium">
-                              ${(reservation.totalPrice || 0).toFixed(2)}
+                              dt{(reservation.totalPrice || 0).toFixed(2)}
                             </div>
                           </TableCell>
                           {userRole === 'admin' && (
@@ -848,11 +849,12 @@ const Dashboard: React.FC = () => {
 
         {/* Tabs - Mobile Responsive */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 h-10 sm:h-11">
-            <TabsTrigger value="reservations" className="text-xs sm:text-sm px-2 sm:px-4">{t('dashboard.tabs.reservations')}</TabsTrigger>
-            <TabsTrigger value="history" className="text-xs sm:text-sm px-2 sm:px-4">{t('dashboard.tabs.history')}</TabsTrigger>
-            <TabsTrigger value="calendar" className="text-xs sm:text-sm px-2 sm:px-4">{t('dashboard.tabs.calendar')}</TabsTrigger>
-            <TabsTrigger value="services" className="text-xs sm:text-sm px-2 sm:px-4">{t('dashboard.tabs.services')}</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 h-10 sm:h-11">
+            <TabsTrigger value="reservations" className="text-xs sm:text-sm px-1 sm:px-2">{t('dashboard.tabs.reservations')}</TabsTrigger>
+            <TabsTrigger value="history" className="text-xs sm:text-sm px-1 sm:px-2">{t('dashboard.tabs.history')}</TabsTrigger>
+            <TabsTrigger value="calendar" className="text-xs sm:text-sm px-1 sm:px-2">{t('dashboard.tabs.calendar')}</TabsTrigger>
+            <TabsTrigger value="services" className="text-xs sm:text-sm px-1 sm:px-2">{t('dashboard.tabs.services')}</TabsTrigger>
+            <TabsTrigger value="reviews" className="text-xs sm:text-sm px-1 sm:px-2">{t('dashboard.tabs.reviews')}</TabsTrigger>
           </TabsList>
 
           {/* Services Tab */}
@@ -879,7 +881,7 @@ const Dashboard: React.FC = () => {
                     <TableRow key={`service-${service.id}-${index}`}>
                       <TableCell>{service.name}</TableCell>
                       <TableCell>{service.duration} {t('dashboard.services.minutes')}</TableCell>
-                      <TableCell>${service.price}</TableCell>
+                      <TableCell>dt{service.price}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button size="sm" onClick={() => openEditModal(service)}>{t('common.edit')}</Button>
@@ -917,7 +919,7 @@ const Dashboard: React.FC = () => {
                   </div>
                   <div className="text-sm font-medium">
                     Usage Rate: {stats.usageRate.toFixed(1)}% |
-                    Revenue: ${stats.totalRevenue.toFixed(2)}
+                    Revenue: dt{stats.totalRevenue.toFixed(2)}
                   </div>
                 </div>
 
@@ -1056,6 +1058,11 @@ const Dashboard: React.FC = () => {
               onSlotClick={() => { }}
               isLoading={isLoading}
             />
+          </TabsContent>
+
+          {/* Reviews Tab */}
+          <TabsContent value="reviews">
+            <ReviewsAdmin />
           </TabsContent>
         </Tabs>
 

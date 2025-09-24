@@ -357,7 +357,7 @@ const MyBookings: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="text-lg sm:text-2xl font-bold text-primary">${myStats.totalSpent.toFixed(2)}</div>
+              <div className="text-lg sm:text-2xl font-bold text-primary">dt{myStats.totalSpent.toFixed(2)}</div>
               <p className="text-xs text-muted-foreground">Lifetime</p>
             </CardContent>
           </Card>
