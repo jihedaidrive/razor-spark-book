@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,7 +15,6 @@ const LoginForm: React.FC = () => {
   const [phoneError, setPhoneError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const { t } = useTranslation();
 
   // PHONE VALIDATION: Must be exactly 8 digits

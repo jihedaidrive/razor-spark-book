@@ -35,7 +35,7 @@ const RegisterForm: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
+
     if (name === 'phone') {
       // Only allow digits and limit to 8 characters
       const cleanValue = value.replace(/\D/g, '').slice(0, 8);
@@ -43,7 +43,7 @@ const RegisterForm: React.FC = () => {
         ...formData,
         [name]: cleanValue,
       });
-      
+
       // Clear error when user starts typing
       if (phoneError) {
         setPhoneError('');
@@ -58,12 +58,12 @@ const RegisterForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate phone number before submission
     if (!validatePhone(formData.phone)) {
       return;
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
       return; // Error already shown in UI
     }
@@ -73,11 +73,11 @@ const RegisterForm: React.FC = () => {
     setIsLoading(true);
     try {
       await register(formData.phone, formData.password, formData.name);
-      
+
       // Check for return URL or intended service
       const returnTo = location.state?.returnTo;
       const intendedService = sessionStorage.getItem('intendedService');
-      
+
       if (returnTo) {
         navigate(returnTo, { replace: true });
       } else if (intendedService) {
@@ -93,7 +93,7 @@ const RegisterForm: React.FC = () => {
     }
   };
 
-  const isFormValid = 
+  const isFormValid =
     formData.name &&
     formData.phone &&
     formData.password &&
@@ -113,7 +113,7 @@ const RegisterForm: React.FC = () => {
             Join us and book your perfect cut today
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -132,7 +132,7 @@ const RegisterForm: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="phone">{t('forms.phone')}</Label>
               <div className="relative">
@@ -154,7 +154,7 @@ const RegisterForm: React.FC = () => {
               )}
               <p className="text-xs text-muted-foreground">{t('forms.phonePlaceholder')}</p>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="password">{t('forms.password')}</Label>
               <div className="relative">
@@ -171,7 +171,7 @@ const RegisterForm: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">{t('forms.confirmPassword')}</Label>
               <div className="relative">
@@ -191,7 +191,7 @@ const RegisterForm: React.FC = () => {
                 <p className="text-sm text-destructive">{t('validation.passwordsDoNotMatch')}</p>
               )}
             </div>
-            
+
             <Button
               type="submit"
               className="w-full"
@@ -201,7 +201,7 @@ const RegisterForm: React.FC = () => {
               {t('forms.registerButton')}
             </Button>
           </form>
-          
+
           <div className="mt-6 text-center text-sm">
             <span className="text-muted-foreground">Already have an account? </span>
             <Link
