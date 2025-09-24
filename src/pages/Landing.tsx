@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import ServiceCard from '@/components/ServiceCard';
@@ -21,6 +21,7 @@ const Landing: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -37,7 +38,24 @@ const Landing: React.FC = () => {
   }, []);
 
   const handleBookService = (service: Service) => {
-    window.location.href = `/booking?service=${service.id}`;
+    try {
+      if (user) {
+        navigate(`/booking?service=${service.id}`);
+      } else {
+        // Store the intended service in sessionStorage for after login
+        sessionStorage.setItem('intendedService', service.id);
+        navigate('/register', { 
+          state: { 
+            returnTo: `/booking?service=${service.id}`,
+            serviceName: service.name 
+          } 
+        });
+      }
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback to direct URL navigation if React Router fails
+      window.location.href = user ? `/booking?service=${service.id}` : '/register';
+    }
   };
 
 

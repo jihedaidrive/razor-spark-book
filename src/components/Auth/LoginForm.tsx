@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,6 +15,7 @@ const LoginForm: React.FC = () => {
   const [phoneError, setPhoneError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
 
   // PHONE VALIDATION: Must be exactly 8 digits
@@ -55,7 +56,19 @@ const LoginForm: React.FC = () => {
     setIsLoading(true);
     try {
       await login(phone, password);
-      navigate('/dashboard'); // Navigate to dashboard after successful login
+      
+      // Check for return URL from ProtectedRoute or intended service
+      const returnTo = location.state?.from?.pathname + (location.state?.from?.search || '');
+      const intendedService = sessionStorage.getItem('intendedService');
+      
+      if (returnTo && returnTo !== '/') {
+        navigate(returnTo, { replace: true });
+      } else if (intendedService) {
+        sessionStorage.removeItem('intendedService');
+        navigate(`/booking?service=${intendedService}`, { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     } catch (error) {
       // Error is handled by the auth context
     } finally {
