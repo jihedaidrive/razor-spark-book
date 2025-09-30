@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 // Import centralized barber configuration for consistency
 import { BARBERS } from '@/config/barbers';
 import ReviewsAdmin from '@/components/ReviewsAdmin';
+import PushNotificationAdmin from '@/components/PushNotificationAdmin';
 
 // Reservation History Component
 interface ReservationHistoryProps {
@@ -849,12 +850,13 @@ const Dashboard: React.FC = () => {
 
         {/* Tabs - Mobile Responsive */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 h-10 sm:h-11">
-            <TabsTrigger value="reservations" className="text-xs sm:text-sm px-1 sm:px-2">{t('dashboard.tabs.reservations')}</TabsTrigger>
-            <TabsTrigger value="history" className="text-xs sm:text-sm px-1 sm:px-2">{t('dashboard.tabs.history')}</TabsTrigger>
-            <TabsTrigger value="calendar" className="text-xs sm:text-sm px-1 sm:px-2">{t('dashboard.tabs.calendar')}</TabsTrigger>
-            <TabsTrigger value="services" className="text-xs sm:text-sm px-1 sm:px-2">{t('dashboard.tabs.services')}</TabsTrigger>
-            <TabsTrigger value="reviews" className="text-xs sm:text-sm px-1 sm:px-2">{t('dashboard.tabs.reviews')}</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6 h-10 sm:h-11">
+            <TabsTrigger value="reservations" className="text-xs sm:text-sm px-1">{t('dashboard.tabs.reservations')}</TabsTrigger>
+            <TabsTrigger value="history" className="text-xs sm:text-sm px-1">{t('dashboard.tabs.history')}</TabsTrigger>
+            <TabsTrigger value="calendar" className="text-xs sm:text-sm px-1">{t('dashboard.tabs.calendar')}</TabsTrigger>
+            <TabsTrigger value="services" className="text-xs sm:text-sm px-1">{t('dashboard.tabs.services')}</TabsTrigger>
+            <TabsTrigger value="reviews" className="text-xs sm:text-sm px-1">{t('dashboard.tabs.reviews')}</TabsTrigger>
+            <TabsTrigger value="notifications" className="text-xs sm:text-sm px-1">{t('dashboard.tabs.notifications')}</TabsTrigger>
           </TabsList>
 
           {/* Services Tab */}
@@ -1063,6 +1065,11 @@ const Dashboard: React.FC = () => {
           {/* Reviews Tab */}
           <TabsContent value="reviews">
             <ReviewsAdmin />
+          </TabsContent>
+
+          {/* Notifications Tab */}
+          <TabsContent value="notifications">
+            <PushNotificationAdmin />
           </TabsContent>
         </Tabs>
 

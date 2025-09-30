@@ -8,6 +8,9 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    // HTTPS disabled for local development to match backend HTTP
+    // For push notification testing, use ngrok instead
+    // https: undefined, // Explicitly disabled
   },
   plugins: [
     react(),

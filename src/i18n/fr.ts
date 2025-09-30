@@ -83,6 +83,7 @@ export const frenchTranslations = {
       services: 'Services',
       history: 'Historique',
       reviews: 'Avis',
+      notifications: 'Notifications',
     },
     reservations: {
       date: 'Date',

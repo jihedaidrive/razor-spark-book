@@ -83,6 +83,7 @@ export const englishTranslations = {
       services: 'Services',
       history: 'History',
       reviews: 'Reviews',
+      notifications: 'Notifications',
     },
     reservations: {
       date: 'Date',
