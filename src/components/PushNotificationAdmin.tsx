@@ -23,6 +23,7 @@ import { usePushNotifications } from '@/hooks/usePushNotifications';
 import NotificationPermission from './NotificationPermission';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import VapidDebugHelper from './VapidDebugHelper';
 
 
 const PushNotificationAdmin: React.FC = () => {
@@ -66,6 +67,9 @@ const PushNotificationAdmin: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Temporary Debug Helper - Remove after fixing */}
+      <VapidDebugHelper />
+      
       {/* Main Notification Control */}
       <NotificationPermission
         isSupported={isSupported}

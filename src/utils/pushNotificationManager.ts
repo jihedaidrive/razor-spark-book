@@ -202,7 +202,6 @@ class PushNotificationManager {
           // Ignore parse errors
         }
 
-        // Specific error messages for common production issues
         if (response.status === 404) {
           throw new Error('VAPID endpoint not found. Backend notification endpoints may not be deployed to production.');
         } else if (response.status === 401) {
@@ -222,24 +221,64 @@ class PushNotificationManager {
       try {
         const responseText = await response.text();
         data = JSON.parse(responseText);
+
+        // Temporary debug logging for production troubleshooting
+        // This will help us see exactly what the backend is returning
+        if (import.meta.env.PROD) {
+          console.log('🔍 Production VAPID Response Debug:', {
+            responseText: responseText.substring(0, 500),
+            parsedData: data,
+            dataType: typeof data,
+            dataKeys: data && typeof data === 'object' ? Object.keys(data) : 'N/A'
+          });
+        }
       } catch (parseError) {
         throw new Error('Invalid JSON response from VAPID endpoint');
       }
 
       // Handle different possible response formats
       let publicKey = null;
+
+      // Try different possible response structures
       if (data.publicKey) {
         publicKey = data.publicKey;
       } else if (data.vapidPublicKey) {
         publicKey = data.vapidPublicKey;
       } else if (data.key) {
         publicKey = data.key;
+      } else if (data.data && data.data.publicKey) {
+        publicKey = data.data.publicKey;
+      } else if (data.result && data.result.publicKey) {
+        publicKey = data.result.publicKey;
+      } else if (data.vapid && data.vapid.publicKey) {
+        publicKey = data.vapid.publicKey;
+      } else if (data.keys && data.keys.publicKey) {
+        publicKey = data.keys.publicKey;
+      } else if (data.notification && data.notification.publicKey) {
+        publicKey = data.notification.publicKey;
       } else if (typeof data === 'string') {
         publicKey = data;
       }
 
+      // If publicKey is still an object, try to extract the actual key
+      if (publicKey && typeof publicKey === 'object') {
+        if (publicKey.key) {
+          publicKey = publicKey.key;
+        } else if (publicKey.publicKey) {
+          publicKey = publicKey.publicKey;
+        } else if (publicKey.value) {
+          publicKey = publicKey.value;
+        } else if (publicKey.data) {
+          publicKey = publicKey.data;
+        } else if (Array.isArray(publicKey) && publicKey.length > 0) {
+          publicKey = publicKey[0];
+        }
+      }
+
       if (!publicKey || typeof publicKey !== 'string') {
-        throw new Error(`Invalid VAPID public key format. Expected string, got: ${typeof publicKey}`);
+        // Enhanced error message with response structure for debugging
+        const responseStructure = JSON.stringify(data, null, 2);
+        throw new Error(`Invalid VAPID public key format. Expected string, got: ${typeof publicKey}. Backend response: ${responseStructure}`);
       }
 
       // Validate VAPID key format (should be base64url)
