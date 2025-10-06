@@ -167,15 +167,18 @@ class PushNotificationManager {
   }
 
   /**
-   * Get VAPID public key from backend
+   * Get VAPID public key from backend (Enhanced error handling)
    */
   async getVapidPublicKey(authToken: string): Promise<string> {
     if (this.vapidPublicKey) {
       return this.vapidPublicKey;
     }
 
+    const endpoint = `${this.apiBaseUrl}/notifications/vapid-public-key`;
+    console.log('🔑 Fetching VAPID key from:', endpoint);
+
     try {
-      const response = await fetch(`${this.apiBaseUrl}/notifications/vapid-public-key`, {
+      const response = await fetch(endpoint, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${authToken}`,
@@ -183,21 +186,55 @@ class PushNotificationManager {
         }
       });
 
+      console.log('🔑 VAPID key response status:', response.status);
+      console.log('🔑 VAPID key response headers:', Object.fromEntries(response.headers.entries()));
+
       if (!response.ok) {
-        throw new Error(`Failed to get VAPID key: ${response.status} ${response.statusText}`);
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        
+        try {
+          const errorData = await response.text();
+          console.error('🔑 VAPID key error response:', errorData);
+          errorMessage += ` - ${errorData}`;
+        } catch (parseError) {
+          console.error('🔑 Could not parse error response:', parseError);
+        }
+
+        // Specific error messages for common issues
+        if (response.status === 404) {
+          throw new Error('VAPID endpoint not found. Backend may not have notification endpoints implemented.');
+        } else if (response.status === 401) {
+          throw new Error('Authentication failed. Please login again.');
+        } else if (response.status === 403) {
+          throw new Error('Access denied. Only admin users can access notifications.');
+        } else if (response.status >= 500) {
+          throw new Error('Backend server error. Please try again later.');
+        }
+
+        throw new Error(`Failed to get VAPID key: ${errorMessage}`);
       }
 
       const data = await response.json();
+      console.log('🔑 VAPID key response data:', data);
+
       this.vapidPublicKey = data.publicKey;
 
       if (!this.vapidPublicKey) {
-        throw new Error('Invalid VAPID public key received');
+        console.error('🔑 Invalid VAPID key data structure:', data);
+        throw new Error('Invalid VAPID public key received from backend');
       }
 
+      console.log('✅ VAPID key retrieved successfully');
       return this.vapidPublicKey;
     } catch (error) {
-      console.error('Error fetching VAPID public key:', error);
-      throw new Error('Failed to retrieve VAPID public key');
+      console.error('❌ Error fetching VAPID public key:', error);
+      
+      // Enhanced error reporting
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error(`Network error: Cannot connect to backend at ${this.apiBaseUrl}. Check if backend is running.`);
+      }
+      
+      throw error instanceof Error ? error : new Error('Failed to retrieve VAPID public key');
     }
   }
 

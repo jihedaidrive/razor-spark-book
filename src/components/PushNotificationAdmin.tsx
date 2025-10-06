@@ -25,6 +25,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import BrowserSupportDebug from './BrowserSupportDebug';
 import NotificationQuickFix from './NotificationQuickFix';
+import BackendEndpointTester from './BackendEndpointTester';
 
 const PushNotificationAdmin: React.FC = () => {
   const { user } = useAuth();
@@ -69,6 +70,9 @@ const PushNotificationAdmin: React.FC = () => {
     <div className="space-y-6">
       {/* Browser Support Debug */}
       <BrowserSupportDebug />
+      
+      {/* Backend Endpoint Tester */}
+      <BackendEndpointTester />
       
       {/* Quick Fix Tools */}
       <NotificationQuickFix />
