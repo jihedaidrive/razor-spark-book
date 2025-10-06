@@ -30,43 +30,50 @@ class PushNotificationManager {
   private apiBaseUrl: string;
 
   constructor() {
-    this.apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    this.apiBaseUrl = this.getApiBaseUrl();
+  }
+
+  /**
+   * Get the correct API base URL for different environments
+   */
+  private getApiBaseUrl(): string {
+    // Check environment variables in order of priority
+    const envUrl = import.meta.env.VITE_API_URL;
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    const serverUrl = import.meta.env.VITE_SERVER_URL;
+
+    // Production URL detection
+    if (envUrl) return envUrl;
+    if (backendUrl) return backendUrl;
+    if (serverUrl) return serverUrl;
+
+    // Auto-detect based on current domain for production
+    if (import.meta.env.PROD) {
+      const currentDomain = window.location.hostname;
+
+      // Common production patterns
+      if (currentDomain.includes('vercel.app') || currentDomain.includes('netlify.app')) {
+        // For Vercel/Netlify deployments, try common backend patterns
+        return `https://barber-backend-4817.onrender.com`; // Your known backend URL
+      }
+
+      // Default production backend
+      return `https://barber-backend-4817.onrender.com`;
+    }
+
+    // Development fallback
+    return 'http://localhost:3000';
   }
 
   /**
    * Check if push notifications are supported in the current browser
    */
   isSupported(): boolean {
-    // Enhanced browser support detection with debugging
-    const checks = {
-      serviceWorker: 'serviceWorker' in navigator,
-      pushManager: 'PushManager' in window,
-      notification: 'Notification' in window,
-      fetch: 'fetch' in window,
-      https: location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1'
-    };
-
-    // Debug logging for production troubleshooting
-    console.log('Push Notification Support Check:', checks);
-    console.log('User Agent:', navigator.userAgent);
-    console.log('Location:', location.href);
-
-    // Check each requirement
-    const isSupported = checks.serviceWorker &&
-      checks.pushManager &&
-      checks.notification &&
-      checks.fetch &&
-      checks.https;
-
-    if (!isSupported) {
-      console.warn('Push notifications not supported. Missing:',
-        Object.entries(checks)
-          .filter(([key, value]) => !value)
-          .map(([key]) => key)
-      );
-    }
-
-    return isSupported;
+    return 'serviceWorker' in navigator &&
+      'PushManager' in window &&
+      'Notification' in window &&
+      'fetch' in window &&
+      (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1');
   }
 
   /**
@@ -120,38 +127,28 @@ class PushNotificationManager {
         updateViaCache: 'none'
       });
 
-      console.log('Service Worker registered successfully:', this.serviceWorkerRegistration);
-
       // Handle service worker updates
       this.serviceWorkerRegistration.addEventListener('updatefound', () => {
         const newWorker = this.serviceWorkerRegistration?.installing;
         if (newWorker) {
           newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              console.log('New service worker available');
-              // Optionally show update notification to user
+              // New service worker available
             }
           });
         }
       });
 
-      // Listen for messages from service worker
       // Listen for messages from service worker (mobile-optimized)
       navigator.serviceWorker.addEventListener('message', (event) => {
-        console.log('Message from service worker:', event.data);
 
         if (event.data?.type === 'NAVIGATE' || event.data?.type === 'MOBILE_NAVIGATE') {
           // Handle navigation requests from service worker
-          console.log('Navigating to:', event.data.url);
-
-          // For mobile, use smooth navigation
           if (event.data.type === 'MOBILE_NAVIGATE') {
-            // Add mobile-specific navigation handling
             window.location.href = event.data.url;
-
-            // Optional: Add mobile app-like transition
+            // Add mobile app-like transition
             if ('vibrate' in navigator) {
-              navigator.vibrate(100); // Quick feedback vibration
+              navigator.vibrate(100);
             }
           } else {
             window.location.href = event.data.url;
@@ -167,7 +164,7 @@ class PushNotificationManager {
   }
 
   /**
-   * Get VAPID public key from backend (Enhanced error handling)
+   * Get VAPID public key from backend (Production-ready with fallbacks)
    */
   async getVapidPublicKey(authToken: string): Promise<string> {
     if (this.vapidPublicKey) {
@@ -175,65 +172,99 @@ class PushNotificationManager {
     }
 
     const endpoint = `${this.apiBaseUrl}/notifications/vapid-public-key`;
-    console.log('🔑 Fetching VAPID key from:', endpoint);
 
     try {
       const response = await fetch(endpoint, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${authToken}`,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        signal: AbortSignal.timeout(10000) // 10 second timeout
       });
-
-      console.log('🔑 VAPID key response status:', response.status);
-      console.log('🔑 VAPID key response headers:', Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-        
+        let errorDetails = '';
+
         try {
-          const errorData = await response.text();
-          console.error('🔑 VAPID key error response:', errorData);
-          errorMessage += ` - ${errorData}`;
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const errorData = await response.json();
+            errorDetails = errorData.message || errorData.error || JSON.stringify(errorData);
+          } else {
+            const errorText = await response.text();
+            errorDetails = errorText;
+          }
+          errorMessage += ` - ${errorDetails}`;
         } catch (parseError) {
-          console.error('🔑 Could not parse error response:', parseError);
+          // Ignore parse errors
         }
 
-        // Specific error messages for common issues
+        // Specific error messages for common production issues
         if (response.status === 404) {
-          throw new Error('VAPID endpoint not found. Backend may not have notification endpoints implemented.');
+          throw new Error('VAPID endpoint not found. Backend notification endpoints may not be deployed to production.');
         } else if (response.status === 401) {
-          throw new Error('Authentication failed. Please login again.');
+          throw new Error('Authentication failed. Please logout and login again.');
         } else if (response.status === 403) {
           throw new Error('Access denied. Only admin users can access notifications.');
-        } else if (response.status >= 500) {
-          throw new Error('Backend server error. Please try again later.');
+        } else if (response.status === 500) {
+          throw new Error('Backend server error. The notification service may not be configured in production.');
+        } else if (response.status === 502 || response.status === 503) {
+          throw new Error('Backend service unavailable. Please try again in a few minutes.');
         }
 
         throw new Error(`Failed to get VAPID key: ${errorMessage}`);
       }
 
-      const data = await response.json();
-      console.log('🔑 VAPID key response data:', data);
-
-      this.vapidPublicKey = data.publicKey;
-
-      if (!this.vapidPublicKey) {
-        console.error('🔑 Invalid VAPID key data structure:', data);
-        throw new Error('Invalid VAPID public key received from backend');
+      let data;
+      try {
+        const responseText = await response.text();
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        throw new Error('Invalid JSON response from VAPID endpoint');
       }
 
-      console.log('✅ VAPID key retrieved successfully');
+      // Handle different possible response formats
+      let publicKey = null;
+      if (data.publicKey) {
+        publicKey = data.publicKey;
+      } else if (data.vapidPublicKey) {
+        publicKey = data.vapidPublicKey;
+      } else if (data.key) {
+        publicKey = data.key;
+      } else if (typeof data === 'string') {
+        publicKey = data;
+      }
+
+      if (!publicKey || typeof publicKey !== 'string') {
+        throw new Error(`Invalid VAPID public key format. Expected string, got: ${typeof publicKey}`);
+      }
+
+      // Validate VAPID key format (should be base64url)
+      if (publicKey.length < 80 || publicKey.length > 90) {
+        throw new Error(`Invalid VAPID key length: ${publicKey.length}. Expected 80-90 characters.`);
+      }
+
+      // Test if it's valid base64url
+      try {
+        this.urlBase64ToUint8Array(publicKey);
+      } catch (base64Error) {
+        throw new Error('VAPID key is not valid base64url format');
+      }
+
+      this.vapidPublicKey = publicKey;
       return this.vapidPublicKey;
     } catch (error) {
-      console.error('❌ Error fetching VAPID public key:', error);
-      
-      // Enhanced error reporting
       if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw new Error(`Network error: Cannot connect to backend at ${this.apiBaseUrl}. Check if backend is running.`);
+        throw new Error(`Network error: Cannot connect to backend at ${this.apiBaseUrl}`);
       }
-      
+
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout: Backend took too long to respond');
+      }
+
       throw error instanceof Error ? error : new Error('Failed to retrieve VAPID public key');
     }
   }
@@ -293,7 +324,6 @@ class PushNotificationManager {
         applicationServerKey: applicationServerKey as BufferSource
       });
 
-      console.log('Push subscription created:', subscription);
       return subscription;
     } catch (error) {
       console.error('Error creating push subscription:', error);
@@ -333,8 +363,6 @@ class PushNotificationManager {
         throw new Error(errorData.message || `Subscription failed: ${response.status}`);
       }
 
-      console.log('Successfully subscribed to push notifications');
-
       toast({
         title: 'Notifications Enabled',
         description: 'You will now receive push notifications for new reservations.',
@@ -358,7 +386,6 @@ class PushNotificationManager {
       if (subscription) {
         // Unsubscribe from browser
         await subscription.unsubscribe();
-        console.log('Unsubscribed from browser push notifications');
       }
 
       // Remove subscription from backend
@@ -371,7 +398,7 @@ class PushNotificationManager {
       });
 
       if (!response.ok) {
-        console.warn('Failed to remove subscription from backend:', response.status);
+        // Failed to remove from backend, but continue
       }
 
       toast({
