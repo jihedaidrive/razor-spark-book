@@ -260,28 +260,27 @@ class PushNotificationManager {
         publicKey = data;
       }
 
-      // If publicKey is still an object, try to extract the actual key
+      // If publicKey is still an object, try to extract the actual key recursively
       if (publicKey && typeof publicKey === 'object') {
-        if (publicKey.key) {
-          publicKey = publicKey.key;
-        } else if (publicKey.publicKey) {
-          publicKey = publicKey.publicKey;
-        } else if (publicKey.value) {
-          publicKey = publicKey.value;
-        } else if (publicKey.data) {
-          publicKey = publicKey.data;
-        } else if (Array.isArray(publicKey) && publicKey.length > 0) {
-          publicKey = publicKey[0];
-        }
+        publicKey = this.extractStringFromObject(publicKey);
       }
 
       if (!publicKey || typeof publicKey !== 'string') {
         // Enhanced error message with response structure for debugging
         const responseStructure = JSON.stringify(data, null, 2);
-        throw new Error(`Invalid VAPID public key format. Expected string, got: ${typeof publicKey}. Backend response: ${responseStructure}`);
+
+        // Try one more desperate attempt - look for any string that looks like a VAPID key
+        const allStrings = this.findAllStringsInObject(data);
+        const possibleKeys = allStrings.filter(str => str.length >= 80 && str.length <= 90);
+
+        if (possibleKeys.length > 0) {
+          console.log('🔍 Found possible VAPID key in response:', possibleKeys[0].substring(0, 20) + '...');
+          publicKey = possibleKeys[0];
+        } else {
+          throw new Error(`Invalid VAPID public key format. Expected string, got: ${typeof publicKey}. Backend response: ${responseStructure.substring(0, 500)}...`);
+        }
       }
 
-      // Validate VAPID key format (should be base64url)
       if (publicKey.length < 80 || publicKey.length > 90) {
         throw new Error(`Invalid VAPID key length: ${publicKey.length}. Expected 80-90 characters.`);
       }
@@ -510,6 +509,78 @@ class PushNotificationManager {
       console.error('Error getting subscriptions:', error);
       return [];
     }
+  }
+
+  /**
+   * Recursively extract string value from nested object
+   */
+  private extractStringFromObject(obj: any): string | null {
+    if (typeof obj === 'string') {
+      return obj;
+    }
+
+    if (!obj || typeof obj !== 'object') {
+      return null;
+    }
+
+    // Common key names for VAPID public keys
+    const commonKeys = ['key', 'publicKey', 'value', 'data', 'vapidPublicKey', 'public_key'];
+
+    for (const keyName of commonKeys) {
+      if (obj[keyName]) {
+        const result = this.extractStringFromObject(obj[keyName]);
+        if (result && typeof result === 'string') {
+          return result;
+        }
+      }
+    }
+
+    // If it's an array, try the first element
+    if (Array.isArray(obj) && obj.length > 0) {
+      return this.extractStringFromObject(obj[0]);
+    }
+
+    // Try all object values
+    for (const value of Object.values(obj)) {
+      if (typeof value === 'string' && value.length > 80) {
+        // Looks like a VAPID key (base64url encoded, should be 80+ chars)
+        return value;
+      }
+      if (typeof value === 'object') {
+        const result = this.extractStringFromObject(value);
+        if (result) return result;
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * Find all string values in an object (recursive)
+   */
+  private findAllStringsInObject(obj: any): string[] {
+    const strings: string[] = [];
+
+    if (typeof obj === 'string') {
+      strings.push(obj);
+      return strings;
+    }
+
+    if (!obj || typeof obj !== 'object') {
+      return strings;
+    }
+
+    if (Array.isArray(obj)) {
+      for (const item of obj) {
+        strings.push(...this.findAllStringsInObject(item));
+      }
+    } else {
+      for (const value of Object.values(obj)) {
+        strings.push(...this.findAllStringsInObject(value));
+      }
+    }
+
+    return strings;
   }
 
   /**
