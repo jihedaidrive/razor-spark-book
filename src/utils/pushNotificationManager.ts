@@ -234,89 +234,34 @@ class PushNotificationManager {
         throw new Error('Invalid JSON response from VAPID endpoint');
       }
 
-      // BRUTE FORCE APPROACH - Try EVERY possible way to extract the VAPID key
+      // Handle the specific case where backend returns {"publicKey": ""}
       let publicKey = null;
 
       console.log('🔍 Starting VAPID key extraction from:', data);
 
-      // First, try to find ANY string that looks like a VAPID key (80-90 chars, base64url)
-      const allStrings = this.findAllStringsInObject(data);
-      console.log('🔍 All strings found:', allStrings);
-      
-      const possibleKeys = allStrings.filter(str => 
-        str && typeof str === 'string' && str.length >= 80 && str.length <= 90
-      );
-      console.log('🔍 Possible VAPID keys:', possibleKeys);
-
-      if (possibleKeys.length > 0) {
-        publicKey = possibleKeys[0];
-        console.log('🔍 Using first possible key:', publicKey.substring(0, 20) + '...');
-      } else {
-        // Fallback to standard extraction
-        if (data.publicKey) {
-          publicKey = data.publicKey;
-        } else if (data.vapidPublicKey) {
-          publicKey = data.vapidPublicKey;
-        } else if (data.key) {
-          publicKey = data.key;
-        } else if (data.data && data.data.publicKey) {
-          publicKey = data.data.publicKey;
-        } else if (data.result && data.result.publicKey) {
-          publicKey = data.result.publicKey;
-        } else if (data.vapid && data.vapid.publicKey) {
-          publicKey = data.vapid.publicKey;
-        } else if (data.keys && data.keys.publicKey) {
-          publicKey = data.keys.publicKey;
-        } else if (data.notification && data.notification.publicKey) {
-          publicKey = data.notification.publicKey;
-        } else if (typeof data === 'string') {
-          publicKey = data;
+      // Check if publicKey exists but is empty
+      if (data.publicKey !== undefined) {
+        if (data.publicKey === '' || data.publicKey === null) {
+          throw new Error('Backend returned empty VAPID public key. The notification service is not properly configured on the production server. Please check your backend environment variables (VAPID_PUBLIC_KEY).');
         }
-
-        // If publicKey is still an object, try to extract the actual key recursively
-        if (publicKey && typeof publicKey === 'object') {
-          console.log('🔍 Extracting from object:', publicKey);
-          publicKey = this.extractStringFromObject(publicKey);
-        }
+        publicKey = data.publicKey;
+      } else if (data.vapidPublicKey) {
+        publicKey = data.vapidPublicKey;
+      } else if (data.key) {
+        publicKey = data.key;
+      } else if (typeof data === 'string') {
+        publicKey = data;
       }
 
-      console.log('🔍 Final publicKey:', typeof publicKey, publicKey ? publicKey.substring(0, 20) + '...' : 'null');
+      console.log('🔍 Extracted publicKey:', typeof publicKey, publicKey ? publicKey.substring(0, 20) + '...' : 'null');
 
-      if (!publicKey || typeof publicKey !== 'string') {
-        console.error('🔍 VAPID key extraction FAILED');
-        console.error('🔍 Final publicKey type:', typeof publicKey);
-        console.error('🔍 Final publicKey value:', publicKey);
-        console.error('🔍 Full backend response:', JSON.stringify(data, null, 2));
-        
-        // EMERGENCY FALLBACK: Try to use the entire response as string if it looks like a key
-        if (typeof data === 'object' && data) {
-          // Convert the entire object to string and look for base64-like patterns
-          const dataStr = JSON.stringify(data);
-          const base64Pattern = /[A-Za-z0-9_-]{80,90}/g;
-          const matches = dataStr.match(base64Pattern);
-          
-          if (matches && matches.length > 0) {
-            console.log('🔍 EMERGENCY: Found base64-like string in response:', matches[0]);
-            publicKey = matches[0];
-          } else {
-            // Last resort: use any long string in the response
-            const allStrings = this.findAllStringsInObject(data);
-            const longStrings = allStrings.filter(s => s.length > 50);
-            if (longStrings.length > 0) {
-              console.log('🔍 EMERGENCY: Using longest string found:', longStrings[0]);
-              publicKey = longStrings[0];
-            }
-          }
-        }
-        
-        if (!publicKey || typeof publicKey !== 'string') {
-          throw new Error(`VAPID key extraction failed. Got ${typeof publicKey} instead of string. Check console for full backend response.`);
-        }
+      if (!publicKey || typeof publicKey !== 'string' || publicKey.trim() === '') {
+        throw new Error('Invalid or empty VAPID public key received from backend. Please check your production backend configuration.');
       }
 
       // Relaxed validation for production compatibility
       console.log('🔍 Final VAPID key length:', publicKey.length);
-      
+
       if (publicKey.length < 50) {
         throw new Error(`VAPID key too short: ${publicKey.length} characters`);
       }
@@ -530,7 +475,7 @@ class PushNotificationManager {
   async debugVapidEndpoint(authToken: string): Promise<any> {
     const endpoint = `${this.apiBaseUrl}/notifications/vapid-public-key`;
     console.log('🔍 Testing VAPID endpoint:', endpoint);
-    
+
     try {
       const response = await fetch(endpoint, {
         method: 'GET',
@@ -540,16 +485,16 @@ class PushNotificationManager {
           'Accept': 'application/json'
         }
       });
-      
+
       const responseText = await response.text();
       let data;
-      
+
       try {
         data = JSON.parse(responseText);
       } catch (e) {
         data = responseText;
       }
-      
+
       return {
         status: response.status,
         headers: Object.fromEntries(response.headers.entries()),
