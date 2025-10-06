@@ -37,12 +37,36 @@ class PushNotificationManager {
    * Check if push notifications are supported in the current browser
    */
   isSupported(): boolean {
-    return (
-      'serviceWorker' in navigator &&
-      'PushManager' in window &&
-      'Notification' in window &&
-      'fetch' in window
-    );
+    // Enhanced browser support detection with debugging
+    const checks = {
+      serviceWorker: 'serviceWorker' in navigator,
+      pushManager: 'PushManager' in window,
+      notification: 'Notification' in window,
+      fetch: 'fetch' in window,
+      https: location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+    };
+
+    // Debug logging for production troubleshooting
+    console.log('Push Notification Support Check:', checks);
+    console.log('User Agent:', navigator.userAgent);
+    console.log('Location:', location.href);
+
+    // Check each requirement
+    const isSupported = checks.serviceWorker &&
+      checks.pushManager &&
+      checks.notification &&
+      checks.fetch &&
+      checks.https;
+
+    if (!isSupported) {
+      console.warn('Push notifications not supported. Missing:',
+        Object.entries(checks)
+          .filter(([key, value]) => !value)
+          .map(([key]) => key)
+      );
+    }
+
+    return isSupported;
   }
 
   /**
@@ -115,16 +139,16 @@ class PushNotificationManager {
       // Listen for messages from service worker (mobile-optimized)
       navigator.serviceWorker.addEventListener('message', (event) => {
         console.log('Message from service worker:', event.data);
-        
+
         if (event.data?.type === 'NAVIGATE' || event.data?.type === 'MOBILE_NAVIGATE') {
           // Handle navigation requests from service worker
           console.log('Navigating to:', event.data.url);
-          
+
           // For mobile, use smooth navigation
           if (event.data.type === 'MOBILE_NAVIGATE') {
             // Add mobile-specific navigation handling
             window.location.href = event.data.url;
-            
+
             // Optional: Add mobile app-like transition
             if ('vibrate' in navigator) {
               navigator.vibrate(100); // Quick feedback vibration
