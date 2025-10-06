@@ -112,12 +112,26 @@ class PushNotificationManager {
       });
 
       // Listen for messages from service worker
+      // Listen for messages from service worker (mobile-optimized)
       navigator.serviceWorker.addEventListener('message', (event) => {
         console.log('Message from service worker:', event.data);
-
-        if (event.data?.type === 'NAVIGATE') {
+        
+        if (event.data?.type === 'NAVIGATE' || event.data?.type === 'MOBILE_NAVIGATE') {
           // Handle navigation requests from service worker
-          window.location.href = event.data.url;
+          console.log('Navigating to:', event.data.url);
+          
+          // For mobile, use smooth navigation
+          if (event.data.type === 'MOBILE_NAVIGATE') {
+            // Add mobile-specific navigation handling
+            window.location.href = event.data.url;
+            
+            // Optional: Add mobile app-like transition
+            if ('vibrate' in navigator) {
+              navigator.vibrate(100); // Quick feedback vibration
+            }
+          } else {
+            window.location.href = event.data.url;
+          }
         }
       });
 

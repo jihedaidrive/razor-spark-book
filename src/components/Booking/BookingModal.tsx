@@ -12,6 +12,7 @@ import { format, formatISO } from 'date-fns';
 import { User, Calendar, Scissors } from 'lucide-react';
 import { sanitizeNotes, sanitizeHtml } from '@/utils/security';
 import { useTranslation } from 'react-i18next';
+import { triggerNewReservationNotification } from '@/utils/notificationTriggers';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -142,6 +143,14 @@ export default function BookingModal({
       }
 
       const reservation = await reservationsService.createReservation(reservationData);
+
+      // Trigger notification for new reservation (fallback if backend doesn't auto-send)
+      try {
+        await triggerNewReservationNotification(reservation, selectedServices);
+      } catch (notificationError) {
+        console.warn('Failed to send notification, but reservation was created:', notificationError);
+        // Don't fail the booking if notification fails
+      }
 
       const serviceNames = selectedServices
         .map(s => sanitizeHtml(s.name))

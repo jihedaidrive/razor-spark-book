@@ -20,6 +20,8 @@ import { useTranslation } from 'react-i18next';
 import { BARBERS } from '@/config/barbers';
 import ReviewsAdmin from '@/components/ReviewsAdmin';
 import PushNotificationAdmin from '@/components/PushNotificationAdmin';
+import { triggerReservationStatusNotification } from '@/utils/notificationTriggers';
+import NotificationDebug from '@/components/NotificationDebug';
 
 // Reservation History Component
 interface ReservationHistoryProps {
@@ -587,6 +589,12 @@ const Dashboard: React.FC = () => {
 
     console.log('Dashboard: Updating reservation status:', { reservationId, newStatus });
 
+    // Find the current reservation to get old status
+    const currentReservation = reservations.find(res => 
+      (res._id || res.id) === reservationId
+    );
+    const oldStatus = currentReservation?.status || 'unknown';
+
     try {
       // Optimistically update the local state first
       setReservations(prev =>
@@ -606,6 +614,15 @@ const Dashboard: React.FC = () => {
 
       if (updatedReservation) {
         console.log('Dashboard: Status update successful, fetching fresh data');
+        
+        // Trigger notification for status change
+        try {
+          await triggerReservationStatusNotification(updatedReservation, oldStatus, newStatus);
+        } catch (notificationError) {
+          console.warn('Failed to send status change notification:', notificationError);
+          // Don't fail the status update if notification fails
+        }
+        
         // Fetch fresh data to ensure everything is in sync
         await fetchReservations();
 
@@ -803,6 +820,9 @@ const Dashboard: React.FC = () => {
           <h1 className="text-3xl font-bold text-foreground mb-2">{user.role === 'admin' ? t('dashboard.adminDashboard') : t('dashboard.barberDashboard')}</h1>
           <p className="text-muted-foreground">{t('dashboard.welcomeBack')}, {user.name}</p>
         </div>
+
+        {/* Debug Component - Development Only */}
+        <NotificationDebug />
 
         {/* Statistics Cards - Mobile Responsive */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
